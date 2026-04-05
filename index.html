@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>LGBTcoin - Cloud Mining Platform</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --accent: #00ff88;
+            --bg: #050505;
+            --card: #121212;
+            --text: #ffffff;
+            --muted: #888888;
+            --error: #ff4444;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { background: var(--bg); color: var(--text); line-height: 1.6; overflow-x: hidden; }
+
+        /* Анимации */
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(0, 255, 136, 0.4); } 70% { box-shadow: 0 0 0 15px rgba(0, 255, 136, 0); } 100% { box-shadow: 0 0 0 0 rgba(0, 255, 136, 0); } }
+
+        /* Екрани */
+        .screen { display: none; min-height: 100vh; padding: 20px; animation: fadeIn 0.4s ease-out; }
+        .screen.active { display: block; }
+
+        /* Вход / Регистрация */
+        .auth-card { max-width: 400px; margin: 60px auto; text-align: center; background: var(--card); padding: 40px 30px; border-radius: 30px; border: 1px solid #222; }
+        .logo { font-size: 38px; font-weight: 900; background: linear-gradient(45deg, #fff, var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 10px; }
+        
+        input { width: 100%; padding: 18px; margin-bottom: 15px; border-radius: 15px; border: 1px solid #222; background: #000; color: #fff; font-size: 16px; outline: none; transition: 0.3s; }
+        input:focus { border-color: var(--accent); }
+        
+        .btn { width: 100%; padding: 18px; border: none; border-radius: 15px; font-weight: 800; font-size: 16px; cursor: pointer; transition: 0.2s; text-transform: uppercase; letter-spacing: 1px; }
+        .btn-primary { background: var(--accent); color: #000; }
+        .btn-primary:active { transform: scale(0.96); }
+
+        /* Dashboard */
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+        .user-info b { display: block; font-size: 20px; color: var(--accent); }
+        
+        .balance-container { background: linear-gradient(145deg, #151515, #0a0a0a); padding: 40px 20px; border-radius: 30px; border: 1px solid #222; text-align: center; margin-bottom: 25px; position: relative; overflow: hidden; }
+        .balance-container::after { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(circle, rgba(0,255,136,0.05) 0%, transparent 70%); pointer-events: none; }
+        
+        .bal-amount { font-size: 52px; font-weight: 900; color: var(--accent); line-height: 1; margin: 10px 0; }
+        .bal-label { color: var(--muted); font-weight: 700; font-size: 14px; letter-spacing: 3px; }
+
+        /* Mining Button */
+        .mine-card { background: var(--card); border-radius: 25px; padding: 25px; border: 1px solid #222; margin-bottom: 25px; text-align: center; }
+        .mining-btn { width: 100%; height: 100px; border-radius: 20px; background: #1a1a1a; border: 2px solid #333; color: var(--accent); font-size: 22px; font-weight: 900; cursor: pointer; transition: 0.3s; }
+        .mining-btn.active { border-color: var(--accent); animation: pulse 2s infinite; color: #fff; background: #002211; }
+
+        /* Stats */
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 100px; }
+        .stat-item { background: var(--card); padding: 20px; border-radius: 20px; border: 1px solid #222; text-align: center; }
+        .stat-item small { color: var(--muted); font-size: 11px; display: block; margin-bottom: 5px; text-transform: uppercase; font-weight: 700; }
+        .stat-item span { font-weight: 800; font-size: 18px; }
+
+        /* Твоят TON адрес */
+        .address-box { background: #000; padding: 15px; border-radius: 12px; border: 1px dashed #444; margin-top: 10px; font-size: 11px; color: var(--accent); word-break: break-all; font-family: monospace; }
+
+        /* Навигация */
+        .nav { position: fixed; bottom: 0; left: 0; right: 0; height: 85px; background: rgba(10,10,10,0.95); backdrop-filter: blur(10px); display: flex; justify-content: space-around; align-items: center; border-top: 1px solid #222; padding-bottom: 15px; z-index: 1000; }
+        .nav-item { color: #555; text-align: center; font-size: 22px; transition: 0.3s; text-decoration: none; }
+        .nav-item.active { color: var(--accent); }
+        .nav-item span { display: block; font-size: 10px; font-weight: 700; margin-top: 4px; }
+
+        /* Toast notifications */
+        #toast { position: fixed; top: 30px; left: 50%; transform: translateX(-50%) translateY(-100px); background: #fff; color: #000; padding: 12px 25px; border-radius: 50px; font-weight: 800; z-index: 2000; transition: 0.4s cubic-bezier(0.18, 0.89, 0.32, 1.28); box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        #toast.show { transform: translateX(-50%) translateY(0); }
+    </style>
+</head>
+<body>
+
+    <div id="toast">Известие!</div>
+
+    <div id="scr-auth" class="screen active">
+        <div class="auth-card">
+            <div class="logo">LGBTcoin</div>
+            <p style="color: var(--muted); margin-bottom: 35px;">Cloud Mining & Staking</p>
+            
+            <input type="text" id="in-name" placeholder="Твоето име">
+            <input type="tel" id="in-phone" placeholder="Телефон (напр. 35988...)">
+            <input type="password" id="in-pass" placeholder="Парола">
+            
+            <button class="btn btn-primary" onclick="auth()">Влез в системата</button>
+        </div>
+    </div>
+
+    <div id="scr-app" class="screen">
+        <div class="header">
+            <div class="user-info">
+                <span style="color: var(--muted); font-size: 12px;">Добре дошъл обратно,</span>
+                <b id="display-name">Потребител</b>
+            </div>
+            <div onclick="exit()" style="color: var(--error); font-size: 20px;"><i class="fas fa-sign-out-alt"></i></div>
+        </div>
+
+        <div class="balance-container">
+            <div class="bal-label">AVAILABLE BALANCE</div>
+            <div class="bal-amount" id="bal">0.0000</div>
+            <div style="color: var(--muted); font-size: 14px; font-weight: 600;">≈ <span id="euro">0.00</span> EUR</div>
+        </div>
+
+        <div class="mine-card">
+            <button class="mining-btn" id="mbtn" onclick="startMining()">START MINING</button>
+            <p style="font-size: 12px; color: var(--muted); margin-top: 15px;">Текуща скорост: <span style="color:var(--accent)">+0.0001 / 5s</span></p>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-item">
+                <small>Мрежа</small>
+                <span style="color: var(--accent)">Online</span>
+            </div>
+            <div class="stat-item">
+                <small>Hashrate</small>
+                <span id="hashrate">5.2 GH/s</span>
+            </div>
+        </div>
+
+        <div class="stat-item" style="width: 100%; margin-bottom: 120px;">
+            <small>Твоят TON депозит адрес</small>
+            <div class="address-box">UQCuIUIrH59P3BhCYSXiQEp8abCk3Hx83M1JH95wrdhh-Z4C</div>
+        </div>
+
+        <nav class="nav">
+            <div class="nav-item active"><i class="fas fa-hammer"></i><span>Mining</span></div>
+            <div class="nav-item"><i class="fas fa-chart-pie"></i><span>Assets</span></div>
+            <div class="nav-item"><i class="fas fa-wallet"></i><span>Wallet</span></div>
+            <div class="nav-item"><i class="fas fa-user-gear"></i><span>Settings</span></div>
+        </nav>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
+        import { getDatabase, ref, set, get, update, onValue } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-database.js";
+
+        // КОНФИГУРАЦИЯ ЗА БЕЛГИЯ
+        const firebaseConfig = {
+            apiKey: "AIzaSyD9_ZIz7D59Z-fooXVcUOffzEdWCQR3X2o",
+            authDomain: "lgbtcoineu.firebaseapp.com",
+            databaseURL: "https://lgbtcoineu-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "lgbtcoineu",
+            storageBucket: "lgbtcoineu.firebasestorage.app",
+            messagingSenderId: "381272855019",
+            appId: "1:381272855019:web:20ef2cbcea82c2c65f89ae"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        let user = localStorage.getItem("lgbt_session");
+
+        window.msg = (t) => {
+            const toast = document.getElementById('toast');
+            toast.innerText = t; toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        };
+
+        // Вход / Регистрация
+        window.auth = async () => {
+            const n = document.getElementById('in-name').value;
+            const p = document.getElementById('in-phone').value.replace('+', '');
+            const pw = document.getElementById('in-pass').value;
+
+            if(!n || !p || !pw) return msg("Попълнете всички полета!");
+
+            const uRef = ref(db, 'users/' + p);
+            const s = await get(uRef);
+
+            if(!s.exists()) {
+                await set(uRef, { name: n, pass: pw, balance: 0, speed: 5.2 });
+            } else if(s.val().pass !== pw) {
+                return msg("Грешна парола!");
+            }
+
+            localStorage.setItem("lgbt_session", p);
+            location.reload();
+        };
+
+        // Инициализация
+        if(user) {
+            document.getElementById('scr-auth').classList.remove('active');
+            document.getElementById('scr-app').classList.add('active');
+
+            onValue(ref(db, 'users/' + user), (snap) => {
+                const data = snap.val();
+                if(data) {
+                    document.getElementById('display-name').innerText = data.name;
+                    const b = data.balance || 0;
+                    document.getElementById('bal').innerText = b.toFixed(4);
+                    document.getElementById('euro').innerText = (b * 0.42).toFixed(2);
+                    document.getElementById('hashrate').innerText = (data.speed || 5.2) + " GH/s";
+                }
+            });
+        }
+
+        // Майнинг
+        window.startMining = () => {
+            const btn = document.getElementById('mbtn');
+            if(btn.classList.contains('active')) return;
+            
+            btn.classList.add('active');
+            btn.innerText = "MINING...";
+            msg("Майнингът започна успешно!");
+
+            setInterval(() => {
+                let current = parseFloat(document.getElementById('bal').innerText);
+                let next = current + 0.0001;
+                update(ref(db, 'users/' + user), { balance: next });
+            }, 5000);
+        };
+
+        window.exit = () => { localStorage.clear(); location.reload(); };
+    </script>
+</body>
+</html>
