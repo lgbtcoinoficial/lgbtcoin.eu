@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>LGBTcoin - Ultimate Miner</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root { 
+            --black: #000000; 
+            --white: #ffffff; 
+            --rainbow: linear-gradient(180deg, #ff0000 0%, #ff8d00 15%, #ffee00 31%, #008121 47%, #004cff 63%, #760089 100%);
+            --gray: #f4f4f4;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { background: var(--gray); color: var(--black); overflow: hidden; }
+
+        /* НАЧАЛЕН ЕКРАН - ЛГБТ ЗНАМЕ */
+        #page-auth { 
+            height: 100vh; background: var(--rainbow); 
+            display: flex; align-items: center; justify-content: center; padding: 20px;
+            position: fixed; width: 100%; z-index: 5000;
+        }
+        .auth-card { 
+            background: rgba(255, 255, 255, 0.98); padding: 40px 30px; border-radius: 35px; 
+            width: 100%; max-width: 400px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+        }
+        .auth-card h1 { font-weight: 900; font-size: 38px; letter-spacing: -1px; margin-bottom: 10px; }
+        
+        input { 
+            width: 100%; padding: 18px; margin-bottom: 12px; border-radius: 15px; 
+            border: 2px solid #eee; font-size: 16px; outline: none; transition: 0.3s;
+        }
+        input:focus { border-color: var(--black); }
+        
+        .btn-auth { 
+            width: 100%; padding: 18px; background: var(--black); color: var(--white); 
+            border: none; border-radius: 15px; font-weight: 900; font-size: 16px; 
+            cursor: pointer; text-transform: uppercase; letter-spacing: 1px;
+        }
+
+        /* ОСНОВЕН ИНТЕРФЕЙС (APP) */
+        #main-ui { display: none; height: 100vh; background: var(--white); }
+        .page { display: none; height: 100vh; padding: 25px; padding-bottom: 120px; overflow-y: auto; }
+        .page.active { display: block; animation: slideUp 0.4s ease-out; }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+        /* КАРТИ И ЕЛЕМЕНТИ */
+        .balance-section { 
+            background: var(--black); color: var(--white); padding: 45px 20px; 
+            border-radius: 35px; text-align: center; margin-bottom: 25px;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+        }
+        .bal-value { font-size: 55px; font-weight: 900; line-height: 1; margin: 10px 0; }
+        
+        .info-row { 
+            display: flex; justify-content: space-between; align-items: center; 
+            background: var(--gray); padding: 20px; border-radius: 20px; margin-bottom: 15px;
+        }
+        .info-row b { font-weight: 900; font-size: 18px; }
+
+        /* МАГАЗИН КАРТИ */
+        .shop-card { 
+            background: var(--white); border: 2px solid #eee; padding: 20px; 
+            border-radius: 25px; margin-bottom: 15px; display: flex; 
+            justify-content: space-between; align-items: center;
+        }
+        .shop-card h4 { font-weight: 900; font-size: 18px; }
+        .btn-buy { 
+            background: var(--black); color: var(--white); border: none; 
+            padding: 12px 20px; border-radius: 12px; font-weight: 800; cursor: pointer;
+        }
+
+        /* НАВИГАЦИЯ */
+        .nav-bar { 
+            position: fixed; bottom: 0; left: 0; width: 100%; height: 90px; 
+            background: var(--white); border-top: 1px solid #eee; 
+            display: flex; justify-content: space-around; align-items: center; padding-bottom: 20px;
+        }
+        .nav-tab { color: #ccc; text-align: center; cursor: pointer; transition: 0.3s; flex: 1; }
+        .nav-tab.active { color: var(--black); }
+        .nav-tab i { font-size: 24px; }
+        .nav-tab span { display: block; font-size: 11px; font-weight: 900; margin-top: 5px; }
+
+        .mine-trigger { 
+            width: 100%; padding: 25px; background: var(--white); border: 4px solid var(--black); 
+            border-radius: 25px; font-weight: 900; font-size: 22px; cursor: pointer; transition: 0.3s;
+        }
+        .mine-trigger.active { background: var(--black); color: var(--white); border-color: var(--black); }
+    </style>
+</head>
+<body>
+
+    <div id="page-auth">
+        <div class="auth-card">
+            <h1>LGBTcoin</h1>
+            <p style="color: #888; margin-bottom: 30px; font-weight: 600;">Cloud Mining & Staking</p>
+            <input type="text" id="reg-name" placeholder="Твоето Име">
+            <input type="tel" id="reg-phone" placeholder="Телефон (напр. 359...)">
+            <input type="password" id="reg-pass" placeholder="Парола">
+            <button class="btn-auth" onclick="handleAuth()">Влез в системата</button>
+        </div>
+    </div>
+
+    <div id="main-ui">
+        
+        <div id="page-mining" class="page active">
+            <div style="display:flex; justify-content:space-between; margin-bottom:20px;">
+                <span style="font-weight:900; font-size:18px;">Miner: <span id="display-user" style="color:#777">...</span></span>
+                <i class="fas fa-sign-out-alt" onclick="logout()" style="color:red; font-size:20px;"></i>
+            </div>
+            
+            <div class="balance-section">
+                <small style="letter-spacing: 3px; font-weight: 800; opacity: 0.6;">AVAILABLE BALANCE</small>
+                <div class="bal-value" id="main-bal">0.0000</div>
+                <p style="font-weight: 800;">LGBT COINS</p>
+            </div>
+
+            <button class="mine-trigger" id="mining-btn" onclick="toggleMining()">START MINING</button>
+            
+            <div class="info-row" style="margin-top:20px;">
+                <span>Current Speed:</span>
+                <b id="display-speed">5.2 GH/s</b>
+            </div>
+        </div>
+
+        <div id="page-shop" class="page">
+            <h2 style="font-weight:900; font-size:28px; margin-bottom:25px;">Магазин</h2>
+            
+            <div class="shop-card">
+                <div><h4>Miner V1</h4><p style="color:#888; font-size:12px;">+3.5 GH/s boost</p></div>
+                <button class="btn-buy" onclick="buyItem(1.5, 3.5)">1.50 LGBT</button>
+            </div>
+
+            <div class="shop-card">
+                <div><h4>Miner Pro</h4><p style="color:#888; font-size:12px;">+12.0 GH/s boost</p></div>
+                <button class="btn-buy" onclick="buyItem(10.0, 12.0)">10.0 LGBT</button>
+            </div>
+
+            <div class="shop-card" style="border-color: #000;">
+                <div><h4>LGBT Turbo</h4><p style="color:#888; font-size:12px;">+50.0 GH/s boost</p></div>
+                <button class="btn-buy" onclick="buyItem(50.0, 50.0)">50.0 LGBT</button>
+            </div>
+        </div>
+
+        <div id="page-invite" class="page">
+            <h2 style="font-weight:900; font-size:28px; margin-bottom:10px;">Покани приятел</h2>
+            <p style="color:#666; margin-bottom:30px;">Вземи 2.0 LGBT бонус за всеки поканен!</p>
+            
+            <div style="background:var(--gray); padding:25px; border-radius:25px; text-align:center;">
+                <p style="font-size:12px; font-weight:800; color:#aaa; margin-bottom:15px; text-transform:uppercase;">Твоят реферален линк</p>
+                <div id="my-link" style="background:#fff; padding:15px; border-radius:15px; border:1px solid #eee; font-size:11px; word-break:break-all; font-family:monospace; margin-bottom:20px;">...</div>
+                <button onclick="copyInvite()" style="width:100%; padding:18px; background:#000; color:#fff; border:none; border-radius:15px; font-weight:900;">КОПИРАЙ ЛИНКА</button>
+            </div>
+        </div>
+
+        <div id="page-settings" class="page">
+            <h2 style="font-weight:900; font-size:28px; margin-bottom:25px;">Настройки</h2>
+            <div class="info-row"><span>Версия:</span><b>1.8.0 PRO</b></div>
+            <div class="info-row"><span>Сървър:</span><b>Belgium-West1</b></div>
+            <div class="info-row" onclick="logout()" style="color:red; cursor:pointer;"><span>Изход от профила</span><i class="fas fa-chevron-right"></i></div>
+        </div>
+
+        <nav class="nav-bar">
+            <div class="nav-tab active" onclick="changeTab('mining')"><i class="fas fa-hammer"></i><span>Mining</span></div>
+            <div class="nav-tab" onclick="changeTab('shop')"><i class="fas fa-shopping-bag"></i><span>Shop</span></div>
+            <div class="nav-tab" onclick="changeTab('invite')"><i class="fas fa-user-plus"></i><span>Invite</span></div>
+            <div class="nav-item" onclick="changeTab('settings')" style="text-align:center; color:#ccc; flex:1;"><i class="fas fa-cog" style="font-size:24px;"></i><span style="display:block; font-size:11px; font-weight:900;">Settings</span></div>
+        </nav>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
+        import { getDatabase, ref, set, get, update, onValue } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyD9_ZIz7D59Z-fooXVcUOffzEdWCQR3X2o",
+            authDomain: "lgbtcoineu.firebaseapp.com",
+            databaseURL: "https://lgbtcoineu-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "lgbtcoineu",
+            appId: "1:381272855019:web:20ef2cbcea82c2c65f89ae"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+        const currentUser = localStorage.getItem("lgbt_user");
+
+        // TAB NAVIGATION
+        window.changeTab = (tabName) => {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById('page-' + tabName).classList.add('active');
+            document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+        };
+
+        // AUTHENTICATION
+        window.handleAuth = async () => {
+            const n = document.getElementById('reg-name').value;
+            const p = document.getElementById('reg-phone').value.trim();
+            const pw = document.getElementById('reg-pass').value;
+            if(!n || !p || !pw) return alert("Моля, попълнете всичко!");
+
+            const uRef = ref(db, 'users/' + p);
+            const snap = await get(uRef);
+            if(!snap.exists()) {
+                await set(uRef, { name: n, balance: 0, speed: 5.2, pass: pw });
+            } else if(snap.val().pass !== pw) {
+                return alert("Грешна парола!");
+            }
+            localStorage.setItem("lgbt_user", p);
+            location.reload();
+        };
+
+        // INITIALIZE DATA
+        if(currentUser) {
+            document.getElementById('page-auth').style.display = 'none';
+            document.getElementById('main-ui').style.display = 'block';
+            document.getElementById('my-link').innerText = window.location.origin + window.location.pathname + "?ref=" + currentUser;
+
+            onValue(ref(db, 'users/' + currentUser), (s) => {
+                const d = s.val();
+                if(d) {
+                    document.getElementById('display-user').innerText = d.name;
+                    document.getElementById('main-bal').innerText = (d.balance || 0).toFixed(4);
+                    document.getElementById('display-speed').innerText = (d.speed || 5.2).toFixed(1) + " GH/s";
+                }
+            });
+        }
+
+        // MINING ENGINE
+        window.toggleMining = () => {
+            const btn = document.getElementById('mining-btn');
+            if(btn.classList.contains('active')) return;
+            btn.classList.add('active'); btn.innerText = "MINING IN PROGRESS...";
+            
+            setInterval(async () => {
+                const s = await get(ref(db, 'users/' + currentUser));
+                const d = s.val();
+                // Логика: Печалба = скорост / 15000 на всеки 3 секунди
+                const gain = (d.speed / 15000);
+                update(ref(db, 'users/' + currentUser), { balance: (d.balance || 0) + gain });
+            }, 3000);
+        };
+
+        // SHOP LOGIC
+        window.buyItem = async (price, boost) => {
+            const s = await get(ref(db, 'users/' + currentUser));
+            const d = s.val();
+            if(d.balance >= price) {
+                await update(ref(db, 'users/' + currentUser), { 
+                    balance: d.balance - price, 
+                    speed: d.speed + boost 
+                });
+                alert("Покупката е успешна! Твоята скорост се увеличи.");
+            } else {
+                alert("Нямаш достатъчно LGBT монети!");
+            }
+        };
+
+        window.copyInvite = () => {
+            navigator.clipboard.writeText(document.getElementById('my-link').innerText);
+            alert("Линкът е копиран в клипборда!");
+        };
+
+        window.logout = () => { localStorage.clear(); location.reload(); };
+    </script>
+</body>
+</html>
