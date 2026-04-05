@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>LGBTcoin Mining</title>
+    <style>
+        * { box-sizing: border-box; }
+        body { background: #000; color: #fff; font-family: -apple-system, sans-serif; text-align: center; margin: 0; padding: 20px; }
+        .container { background: #111; padding: 30px; border-radius: 20px; border: 1px solid #222; max-width: 400px; margin: 40px auto; }
+        h1 { color: #00ff88; font-size: 32px; margin-bottom: 10px; }
+        input { width: 100%; padding: 15px; margin: 10px 0; border-radius: 10px; border: 1px solid #333; background: #000; color: #fff; font-size: 16px; outline: none; }
+        input:focus { border-color: #00ff88; }
+        button { width: 100%; padding: 15px; background: #00ff88; color: #000; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 18px; margin-top: 10px; transition: 0.2s; }
+        button:active { transform: scale(0.98); }
+        .balance { font-size: 45px; font-weight: 900; color: #00ff88; margin: 20px 0; }
+        #app-screen { display: none; }
+        .footer-text { color: #555; font-size: 12px; margin-top: 20px; }
+    </style>
+</head>
+<body>
+
+    <div id="auth-screen">
+        <div class="container">
+            <h1>LGBTcoin</h1>
+            <p style="color: #888;">Въведете данни за достъп</p>
+            <input type="text" id="reg-name" placeholder="Вашето име">
+            <input type="tel" id="reg-phone" placeholder="Телефон (напр. 359...)">
+            <input type="password" id="reg-pass" placeholder="Парола">
+            <button onclick="handleAuth()">ВХОД / РЕГИСТРАЦИЯ</button>
+        </div>
+    </div>
+
+    <div id="app-screen">
+        <div class="container">
+            <h2 id="hello-text">Здравей!</h2>
+            <div class="balance" id="main-bal">0.0000</div>
+            <p style="letter-spacing: 2px; color: #888;">LGBT COINS</p>
+            
+            <button id="mine-btn" onclick="startMining()">START MINING</button>
+            
+            <div style="margin-top: 20px; padding: 15px; background: #000; border-radius: 10px; font-size: 11px; border: 1px dashed #333;">
+                <span style="color: #555;">TON ADDRESS:</span><br>
+                <code style="color: #00ff88; word-break: break-all;">UQCuIUIrH59P3BhCYSXiQEp8abCk3Hx83M1JH95wrdhh-Z4C</code>
+            </div>
+
+            <button onclick="logout()" style="background: none; color: #ff4444; font-size: 14px; margin-top: 20px; border: 1px solid #ff4444;">ИЗХОД</button>
+        </div>
+    </div>
+
+    <script type="module">
+        // Импорт на Firebase библиотеки
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
+        import { getDatabase, ref, set, get, update, onValue } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-database.js";
+
+        // Твоята конфигурация за Белгия
+        const firebaseConfig = {
+            apiKey: "AIzaSyD9_ZIz7D59Z-fooXVcUOffzEdWCQR3X2o",
+            authDomain: "lgbtcoineu.firebaseapp.com",
+            databaseURL: "https://lgbtcoineu-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "lgbtcoineu",
+            storageBucket: "lgbtcoineu.firebasestorage.app",
+            messagingSenderId: "381272855019",
+            appId: "1:381272855019:web:20ef2cbcea82c2c65f89ae"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        // Проверка дали потребителят вече е влязъл
+        let userPhone = localStorage.getItem("lgbt_user");
+
+        if (userPhone) {
+            showApp();
+        }
+
+        // Функция за Вход и Регистрация
+        window.handleAuth = async () => {
+            const name = document.getElementById('reg-name').value;
+            const phone = document.getElementById('reg-phone').value.replace('+', '');
+            const pass = document.getElementById('reg-pass').value;
+
+            if (name.length < 2 || phone.length < 5 || pass.length < 3) {
+                alert("Моля, попълнете всички полета правилно!");
+                return;
+            }
+
+            const userRef = ref(db, 'users/' + phone);
+            const snap = await get(userRef);
+
+            if (!snap.exists()) {
+                // Създаване на нов потребител
+                await set(userRef, { name: name, phone: phone, password: pass, balance: 0 });
+            } else {
+                // Проверка на парола за съществуващ потребител
+                if (snap.val().password !== pass) {
+                    alert("Грешна парола за този номер!");
+                    return;
+                }
+            }
+
+            localStorage.setItem("lgbt_user", phone);
+            location.reload();
+        };
+
+        function showApp() {
+            document.getElementById('auth-screen').style.display = 'none';
+            document.getElementById('app-screen').style.display = 'block';
+
+            // Слушане за промени в баланса в реално време
+            onValue(ref(db, 'users/' + userPhone), (snapshot) => {
+                const data = snapshot.val();
+                if (data) {
+                    document.getElementById('hello-text').innerText = "Здравей, " + data.name + "!";
+                    document.getElementById('main-bal').innerText = (data.balance || 0).toFixed(4);
+                }
+            });
+        }
+
+        // Логика за копаене
+        window.startMining = () => {
+            const btn = document.getElementById('mine-btn');
+            btn.innerText = "MINING IN PROGRESS...";
+            btn.style.background = "#111";
+            btn.style.color = "#00ff88";
+            btn.disabled = true;
+
+            setInterval(() => {
+                let currentBal = parseFloat(document.getElementById('main-bal').innerText);
+                let newBal = currentBal + 0.0001;
+                
+                // Обновяваме локално на екрана
+                document.getElementById('main-bal').innerText = newBal.toFixed(4);
+                
+                // Записваме в базата данни
+                update(ref(db, 'users/' + userPhone), { balance: newBal });
+            }, 3000); // На всеки 3 секунди добавя койн
+        };
+
+        window.logout = () => {
+            localStorage.clear();
+            location.reload();
+        };
+    </script>
+</body>
+</html>
