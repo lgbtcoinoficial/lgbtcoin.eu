@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>GlobalCoin Network</title>
+    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet">
+
+    <style>
+        /* =========================================
+           ПЪЛЕН ЧЕРЕН/ТЪМЕН ДИЗАЙН (DARK THEME)
+           ========================================= */
+        :root {
+            --bg-color: #000000;
+            --panel-bg: rgba(15, 15, 15, 0.9);
+            --border: #222222;
+            --primary: #9d4edd;
+            --primary-glow: rgba(157, 78, 221, 0.5);
+            --text-main: #ffffff;
+            --text-dim: #888888;
+            --success: #00ff88;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { background-color: var(--bg-color); color: var(--text-main); height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
+
+        /* Размазан LGBT фон (Само за Login екрана) */
+        #lgbt-blur-bg {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle at 30% 30%, rgba(255,0,0,0.15), rgba(255,165,0,0.15), rgba(255,255,0,0.15), rgba(0,128,0,0.15), rgba(0,0,255,0.15), rgba(128,0,128,0.15));
+            filter: blur(60px); z-index: 1; pointer-events: none;
+        }
+
+        /* Структура на екраните */
+        .screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: none; flex-direction: column; padding: 20px; padding-bottom: 100px; overflow-y: auto; z-index: 10; }
+        .screen.active { display: flex; animation: fadeUp 0.4s ease; }
+        @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Екран: Регистрация / Вход */
+        #login-screen { z-index: 50; justify-content: center; align-items: center; }
+        .login-box { width: 100%; max-width: 380px; background: rgba(0,0,0,0.7); backdrop-filter: blur(20px); padding: 30px; border-radius: 20px; border: 1px solid var(--border); text-align: center; }
+        .logo-title { font-size: 42px; font-weight: 900; margin-bottom: 30px; background: linear-gradient(90deg, #ff0000, #ffff00, #008800, #0000ff, #8800ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .input-css { width: 100%; padding: 18px; margin-bottom: 15px; border-radius: 12px; border: 1px solid var(--border); background: #0a0a0a; color: #fff; font-size: 16px; }
+        .input-css:focus { border-color: var(--primary); outline: none; box-shadow: 0 0 15px var(--primary-glow); }
+        .btn-css { width: 100%; padding: 18px; border-radius: 12px; border: none; font-size: 16px; font-weight: 800; cursor: pointer; background: var(--primary); color: #fff; text-transform: uppercase; }
+        
+        /* Екран: Копаене (Център) */
+        .mining-area { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; margin-top: 20px; }
+        .balance-val { font-size: 52px; font-weight: 900; line-height: 1; margin-bottom: 5px; }
+        .fiat-val { font-size: 18px; color: var(--text-dim); margin-bottom: 40px; }
+        
+        /* Правоъгълен бутон за копаене */
+        .rect-mine-btn {
+            width: 260px; height: 80px; border-radius: 16px; background: transparent;
+            border: 3px solid var(--primary); color: #fff; font-size: 28px; font-weight: 900;
+            cursor: pointer; box-shadow: 0 0 30px var(--primary-glow); transition: 0.3s;
+            display: flex; align-items: center; justify-content: center; margin-bottom: 40px; text-transform: uppercase;
+        }
+        .rect-mine-btn.active { border-color: var(--success); color: var(--success); box-shadow: 0 0 40px rgba(0, 255, 136, 0.3); }
+
+        .mining-info { text-align: center; color: var(--text-dim); font-size: 14px; }
+        .mining-info strong { color: #fff; font-size: 18px; }
+
+        /* Универсални Карти */
+        .section-h2 { font-size: 28px; font-weight: 900; margin-bottom: 20px; }
+        .card { background: var(--panel-bg); border: 1px solid var(--border); border-radius: 20px; padding: 25px; margin-bottom: 15px; }
+        
+        .shop-row { display: flex; justify-content: space-between; align-items: center; padding: 15px 0; border-bottom: 1px solid var(--border); }
+        .shop-row:last-child { border-bottom: none; }
+        .shop-price { background: rgba(157, 78, 221, 0.2); color: var(--primary); padding: 8px 16px; border-radius: 10px; font-weight: 900; }
+
+        /* Графика */
+        .chart-box { width: 100%; height: 260px; margin-top: 15px; }
+
+        /* Навигация с 5 икони */
+        .nav-bar { position: fixed; bottom: 0; width: 100%; height: 85px; background: rgba(0, 0, 0, 0.95); border-top: 1px solid var(--border); display: flex; justify-content: space-around; align-items: center; padding-bottom: 15px; z-index: 100; }
+        .nav-icon { display: flex; flex-direction: column; align-items: center; color: #555; font-size: 24px; cursor: pointer; transition: 0.3s; }
+        .nav-icon span { font-size: 10px; font-weight: 800; margin-top: 4px; text-transform: uppercase; }
+        .nav-icon.active { color: var(--primary); transform: translateY(-5px); }
+
+        /* Зареждащ екран */
+        #loader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 9999; display: flex; justify-content: center; align-items: center; }
+    </style>
+</head>
+<body>
+
+    <div id="loader"><h1 class="logo-title">GlobalCoin</h1></div>
+    <div id="lgbt-blur-bg"></div>
+
+    <section id="login-screen" class="screen active">
+        <div class="login-box">
+            <h1 class="logo-title">LGBTCoin</h1>
+            <div id="auth-form-1">
+                <input type="text" id="reg-name" class="input-css" placeholder="Your Name (English)">
+                <input type="password" id="reg-pass" class="input-css" placeholder="Password">
+                <input type="tel" id="reg-phone" class="input-css" placeholder="Phone Number (+359...)">
+                <div id="recaptcha-container" style="margin-bottom: 10px;"></div>
+                <button class="btn-css" onclick="sendOTP()">Login / Register</button>
+            </div>
+            <div id="auth-form-2" style="display:none;">
+                <p style="color:var(--text-dim); margin-bottom:15px;">SMS Code has been sent</p>
+                <input type="number" id="reg-otp" class="input-css" placeholder="6-digit code">
+                <button class="btn-css" onclick="verifyOTP()">Verify</button>
+            </div>
+        </div>
+    </section>
+
+    <section id="tab-profile" class="screen">
+        <h2 class="section-h2">My Profile</h2>
+        <div class="card">
+            <p style="font-size:12px; color:var(--text-dim);">USERNAME</p>
+            <h3 id="ui-name" style="font-size:24px; margin-bottom:15px;">Miner</h3>
+            <p style="font-size:12px; color:var(--text-dim);">UNIQUE ID</p>
+            <p id="ui-uid" style="font-size:12px; font-family:monospace; color:var(--primary); word-break:break-all;">...</p>
+        </div>
+        <div class="card">
+            <h3 style="margin-bottom:10px;">Invite Friends</h3>
+            <p style="font-size:14px; color:var(--text-dim); margin-bottom:15px;">When you invite 10 people under you, you will receive a permanent mining speed of 10GH/s.</p>
+            <input type="text" id="ref-link" readonly class="input-css" style="font-size:12px; padding:12px; margin-bottom:10px;">
+            <button class="btn-css" style="padding:12px; background:#222;" onclick="copyRef()">Copy Invite Link</button>
+            <div style="margin-top:20px; text-align:center;">
+                <p style="font-size:12px; color:var(--text-dim);">INVITED PEOPLE</p>
+                <h1 style="font-size:36px;"><span id="ui-refs">0</span> / 10</h1>
+            </div>
+        </div>
+    </section>
+
+    <section id="tab-shop" class="screen">
+        <h2 class="section-h2">Cloud Shop</h2>
+        <div class="card">
+            <div class="shop-row" onclick="buyRig('0.99', '10')">
+                <div><h4>Starter Rig</h4><p style="font-size:12px; color:var(--text-dim);">+10 GH/s</p></div>
+                <div class="shop-price">0.99 €</div>
+            </div>
+            <div class="shop-row" onclick="buyRig('1.99', '50')">
+                <div><h4>Pro Rig</h4><p style="font-size:12px; color:var(--text-dim);">+50 GH/s</p></div>
+                <div class="shop-price">1.99 €</div>
+            </div>
+            <div class="shop-row" style="border:none;" onclick="buyRig('5.99', '100')">
+                <div><h4>Enterprise Rig</h4><p style="font-size:12px; color:var(--text-dim);">+100 GH/s</p></div>
+                <div class="shop-price">5.99 €</div>
+            </div>
+        </div>
+    </section>
+
+    <section id="tab-mining" class="screen">
+        <div class="mining-area">
+            <h1 class="balance-val" id="ui-bal">0.000000</h1>
+            <p class="fiat-val">≈ $<span id="ui-fiat">0.00</span></p>
+
+            <button class="rect-mine-btn" id="mine-btn" onclick="startMine()">MINING</button>
+
+            <div class="mining-info">
+                <p>Currently mining at <strong id="ui-spd">5</strong> <strong>GH/s</strong></p>
+                <p style="margin-top: 10px; font-size:12px;">Cycle resets every 24 hours</p>
+                <p id="ui-timer" style="margin-top:5px; color:var(--primary); font-weight:bold;">24:00:00</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="tab-market" class="screen">
+        <h2 class="section-h2">Market Chart</h2>
+        <div class="card">
+            <p style="font-size:12px; color:var(--text-dim);">LGBTCoin Price</p>
+            <h1 style="font-size:42px;">$<span id="ui-price">0.01</span></h1>
+            <div class="chart-box"><canvas id="revolutChart"></canvas></div>
+        </div>
+    </section>
+
+    <section id="tab-wallet" class="screen">
+        <h2 class="section-h2">Wallet</h2>
+        <div class="card">
+            <h3 style="margin-bottom:10px;">Withdraw Funds</h3>
+            <p style="font-size:12px; color:var(--text-dim); margin-bottom:15px;">Minimum: 100 coins | Network Fee: 1 coin</p>
+            <input type="text" class="input-css" placeholder="Your External Wallet Address">
+            <input type="number" id="wd-amt" class="input-css" placeholder="Amount">
+            <button class="btn-css" onclick="withdrawCoins()">Withdraw</button>
+        </div>
+        <div class="card">
+            <h3 style="margin-bottom:10px;">Send to Friend</h3>
+            <p style="font-size:12px; color:var(--text-dim); margin-bottom:15px;">Minimum: 50 coins</p>
+            <input type="text" id="fr-id" class="input-css" placeholder="Friend's Unique ID">
+            <input type="number" id="fr-amt" class="input-css" placeholder="Amount">
+            <button class="btn-css" style="background:#222;" onclick="sendToFriend()">Send</button>
+        </div>
+    </section>
+
+    <nav class="nav-bar" id="app-nav" style="display:none;">
+        <div class="nav-icon" onclick="switchTab('tab-profile', this)">👤<span>Profile</span></div>
+        <div class="nav-icon" onclick="switchTab('tab-shop', this)">🛒<span>Shop</span></div>
+        <div class="nav-icon active" onclick="switchTab('tab-mining', this)">⛏️<span>Home</span></div>
+        <div class="nav-icon" onclick="switchTab('tab-market', this)">📈<span>Market</span></div>
+        <div class="nav-icon" onclick="switchTab('tab-wallet', this)">💰<span>Wallet</span></div>
+    </nav>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+        import { getAuth, RecaptchaVerifier, signInWithPhoneNumber, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+        import { getDatabase, ref, set, get, onValue, update } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
+
+        // ТВОЯТА КОНФИГУРАЦИЯ ЗА globalcoin-777
+        const firebaseConfig = {
+            apiKey: "AIzaSyA-ErjzeDpm8hZfMaH6Pu41gZ1ldiOE6MA",
+            authDomain: "globalcoin-777.firebaseapp.com",
+            databaseURL: "https://globalcoin-777-default-rtdb.europe-west1.firebasedatabase.app", 
+            projectId: "globalcoin-777",
+            storageBucket: "globalcoin-777.firebasestorage.app",
+            messagingSenderId: "39757488621",
+            appId: "1:39757488621:web:02306af6eb69a2b62d87e4",
+            measurementId: "G-05J4RSBN82"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getDatabase(app);
+
+        let userState = { bal: 0, spd: 5.0, mEnd: 0, name: "", refs: 0, lastSync: Date.now() };
+        let coinPrice = 0.01;
+        let revChart;
+        let mineInterval;
+
+        // --- ВХОД И РЕГИСТРАЦИЯ ---
+        window.sendOTP = () => {
+            const phone = document.getElementById('reg-phone').value.trim();
+            const name = document.getElementById('reg-name').value.trim();
+            const pass = document.getElementById('reg-pass').value.trim();
+            
+            if(name === "" || pass === "") return alert("Please enter Name and Password");
+            if(!phone.startsWith('+')) return alert("Phone must start with +");
+
+            window.tempRegData = { name: name, pass: pass };
+
+            if(!window.recaptchaVerifier) {
+                window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', { size: 'invisible' });
+            }
+            
+            signInWithPhoneNumber(auth, phone, window.recaptchaVerifier)
+                .then(res => { window.confResult = res; document.getElementById('auth-form-1').style.display='none'; document.getElementById('auth-form-2').style.display='block'; })
+                .catch(err => alert("Error: Domain not authorized in Firebase settings. Add your GitHub URL to Authorized Domains."));
+        };
+
+        window.verifyOTP = () => {
+            const code = document.getElementById('reg-otp').value;
+            window.confResult.confirm(code).then(res => setupApp(res.user)).catch(() => alert("Invalid Code"));
+        };
+
+        onAuthStateChanged(auth, user => { if(user) setupApp(user); });
+
+        // --- ИНИЦИАЛИЗАЦИЯ ---
+        async function setupApp(user) {
+            document.getElementById('loader').style.display = 'none';
+            document.getElementById('lgbt-blur-bg').style.display = 'none';
+            document.getElementById('login-screen').classList.remove('active');
+            document.getElementById('app-nav').style.display = 'flex';
+            document.getElementById('tab-mining').classList.add('active');
+
+            const dbRef = ref(db, 'users/' + user.uid);
+            
+            try {
+                const snapshot = await get(dbRef);
+                
+                if(!snapshot.exists()) {
+                    userState.name = window.tempRegData ? window.tempRegData.name : "Miner";
+                    let saveState = { ...userState, password: window.tempRegData ? window.tempRegData.pass : "" };
+                    await set(dbRef, saveState);
+                } else {
+                    const data = snapshot.val();
+                    const now = Date.now();
+                    const diffSecs = (now - data.lastSync) / 1000;
+                    
+                    if(now < data.mEnd) data.bal += (data.spd / 100000) * diffSecs;
+                    else if(data.lastSync < data.mEnd) data.bal += (data.spd / 100000) * ((data.mEnd - data.lastSync) / 1000);
+                    
+                    userState = data;
+                    await update(dbRef, { bal: userState.bal, lastSync: now });
+                }
+
+                document.getElementById('ui-name').innerText = userState.name;
+                document.getElementById('ui-uid').innerText = user.uid;
+                document.getElementById('ref-link').value = `https://${window.location.hostname}/?ref=${user.uid}`;
+                
+                runMiningLoop(user.uid);
+                watchPrice();
+            } catch (err) {
+                alert("Database connection error. Please ensure Realtime Database is created and rules are set to true.");
+            }
+        }
+
+        // --- ДВИГАТЕЛ ЗА КОПАЕНЕ ---
+        function runMiningLoop(uid) {
+            if(mineInterval) clearInterval(mineInterval);
+            mineInterval = setInterval(() => {
+                const now = Date.now();
+                if(now < userState.mEnd) {
+                    userState.bal += (userState.spd / 100000);
+                    if(Math.floor(now/1000) % 15 === 0) update(ref(db, 'users/'+uid), { bal: userState.bal, lastSync: now }).catch(e=>console.log(e));
+                }
+                updateScreen();
+            }, 1000);
+        }
+
+        window.startMine = async () => {
+            if(Date.now() > userState.mEnd) {
+                userState.mEnd = Date.now() + 86400000;
+                await update(ref(db, 'users/'+auth.currentUser.uid), { mEnd: userState.mEnd });
+            }
+        };
+
+        function updateScreen() {
+            document.getElementById('ui-bal').innerText = userState.bal.toFixed(6);
+            document.getElementById('ui-fiat').innerText = (userState.bal * coinPrice).toFixed(4);
+            document.getElementById('ui-spd').innerText = userState.spd;
+            document.getElementById('ui-refs').innerText = userState.refs;
+
+            const btn = document.getElementById('mine-btn');
+            const timer = document.getElementById('ui-timer');
+            const now = Date.now();
+
+            if(now < userState.mEnd) {
+                btn.classList.add('active'); btn.innerText = "MINING...";
+                const d = userState.mEnd - now;
+                const h = Math.floor(d/3600000); const m = Math.floor((d%3600000)/60000); const s = Math.floor((d%60000)/1000);
+                timer.innerText = `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+            } else {
+                btn.classList.remove('active'); btn.innerText = "MINING";
+                timer.innerText = "Ready to start";
+            }
+        }
+
+        // --- ГРАФИКА И ЦЕНА ---
+        function watchPrice() {
+            onValue(ref(db, 'price'), s => {
+                coinPrice = s.val() || 0.01;
+                document.getElementById('ui-price').innerText = coinPrice;
+                buildChart();
+            });
+        }
+
+        function buildChart() {
+            const ctx = document.getElementById('revolutChart').getContext('2d');
+            const grad = ctx.createLinearGradient(0,0,0,250);
+            grad.addColorStop(0, 'rgba(157, 78, 221, 0.4)'); grad.addColorStop(1, 'transparent');
+
+            if(revChart) revChart.destroy();
+            revChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['4h','3h','2h','1h','Now'],
+                    datasets: [{ data: [coinPrice*0.8, coinPrice*1.1, coinPrice*0.9, coinPrice*1.2, coinPrice], borderColor: '#9d4edd', backgroundColor: grad, fill: true, tension: 0.4, borderWidth: 3, pointRadius: 0 }]
+                },
+                options: { plugins: { legend: { display: false } }, scales: { x: { display: false }, y: { display: false } } }
+            });
+        }
+
+        // --- ИНСТРУМЕНТИ ---
+        window.switchTab = (id, el) => {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.nav-icon').forEach(i => i.classList.remove('active'));
+            document.getElementById(id).classList.add('active'); el.classList.add('active');
+        };
+
+        window.copyRef = () => { document.getElementById('ref-link').select(); document.execCommand('copy'); alert("Link Copied!"); };
+        
+        window.buyRig = (price, speed) => {
+            const wallet = "UQA6wHjAHCQAwpFpT7fqnPDTljCSW3Q949qt8xGpGjTkgk3W";
+            alert(`How to buy:\n1. Open Tonkeeper\n2. Send ${price} EUR to: ${wallet}\n3. Include your Unique ID in the comment.`);
+            window.location.href = `ton://transfer/${wallet}?text=UID_${auth.currentUser.uid}`;
+        };
+
+        window.withdrawCoins = async () => {
+            const amt = parseFloat(document.getElementById('wd-amt').value);
+            if(amt < 100) return alert("Minimum withdrawal is 100 coins.");
+            if(userState.bal < amt + 1) return alert("Insufficient balance (Amount + 1 coin fee required).");
+            
+            userState.bal -= (amt + 1);
+            await update(ref(db, 'users/'+auth.currentUser.uid), { bal: userState.bal });
+            alert("Withdrawal request submitted successfully.");
+        };
+
+        window.sendToFriend = async () => {
+            const amt = parseFloat(document.getElementById('fr-amt').value);
+            if(amt < 50) return alert("Minimum transfer is 50 coins.");
+            if(userState.bal < amt) return alert("Insufficient balance.");
+            
+            userState.bal -= amt;
+            await update(ref(db, 'users/'+auth.currentUser.uid), { bal: userState.bal });
+            alert("Coins sent to friend successfully!");
+        };
+
+        setTimeout(() => { if(!auth.currentUser) document.getElementById('loader').style.display='none'; }, 1500);
+    </script>
+</body>
+</html>
