@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Global Coin Mining</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root { --bg: #000; --surf: #111; --pri: #bb86fc; --txt: #fff; }
+        body { margin: 0; background: var(--bg); color: var(--txt); font-family: sans-serif; }
+        
+        .page { display: none; padding: 20px; padding-bottom: 90px; min-height: 100vh; box-sizing: border-box; }
+        .active { display: block; }
+
+        /* Login Screen with LGBT Blur */
+        #login-page {
+            background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('https://upload.wikimedia.org/wikipedia/commons/thumb/4/48/Gay_Pride_Flag.svg/1024px-Gay_Pride_Flag.svg.png') center/cover;
+            backdrop-filter: blur(15px);
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+        }
+
+        .auth-box { background: rgba(20,20,20,0.9); padding: 30px; border-radius: 20px; width: 85%; max-width: 380px; text-align: center; border: 1px solid #333; }
+        input { width: 100%; padding: 14px; margin: 10px 0; border-radius: 10px; border: 1px solid #333; background: #222; color: #fff; box-sizing: border-box; }
+        button { width: 100%; padding: 14px; background: var(--pri); color: #000; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; }
+
+        /* Navigation */
+        .nav { position: fixed; bottom: 0; width: 100%; background: #080808; display: flex; justify-content: space-around; padding: 15px 0; border-top: 1px solid #222; }
+        .nav i { font-size: 22px; color: #555; }
+        .nav i.active { color: var(--pri); }
+
+        /* Mining Section */
+        .mining-circle { width: 200px; height: 200px; border-radius: 50%; background: radial-gradient(circle, #222, #000); border: 4px solid var(--pri); margin: 40px auto; display: flex; flex-direction: column; justify-content: center; align-items: center; box-shadow: 0 0 30px rgba(187, 134, 252, 0.2); }
+        .balance { font-size: 32px; font-weight: bold; margin-bottom: 5px; }
+        .price-tag { color: #0f0; font-size: 14px; }
+        .btn-mine { background: var(--pri); color: #000; padding: 15px 40px; border-radius: 30px; font-weight: bold; border: none; font-size: 18px; box-shadow: 0 4px 15px rgba(187,134,252,0.4); }
+
+        .card { background: var(--surf); padding: 20px; border-radius: 15px; margin-bottom: 15px; border: 1px solid #222; }
+        .wallet-addr { font-size: 10px; background: #000; padding: 10px; border-radius: 5px; word-break: break-all; color: #ffd700; margin-top: 10px; }
+    </style>
+</head>
+<body>
+
+    <div id="login-page" class="page active">
+        <div class="auth-box">
+            <h2 style="margin-bottom: 20px;">Join Global Coin</h2>
+            <input type="text" id="reg-name" placeholder="Full Name">
+            <input type="tel" id="reg-phone" placeholder="Phone Number (e.g. +359...)">
+            <button onclick="handleLogin()">ENTER SITE</button>
+            <p style="font-size: 11px; color: #666; margin-top: 15px;">By entering, you agree to the mining terms.</p>
+        </div>
+    </div>
+
+    <div id="main-app" style="display:none;">
+        
+        <div id="p-profile" class="page">
+            <div class="card">
+                <h3 id="u-name">User Name</h3>
+                <p style="color: #666; font-size: 12px;">ID: <span id="u-id">...</span></p>
+            </div>
+            <div class="card">
+                <h4>Invitation Link</h4>
+                <input type="text" id="invite-url" readonly style="font-size: 12px;">
+                <p>Invited: <strong id="u-invites">0</strong> people</p>
+                <p style="font-size: 12px; color: var(--pri);">Invite 10 people to get +10 GH/s!</p>
+            </div>
+        </div>
+
+        <div id="p-shop" class="page">
+            <h3>Upgrade Speed</h3>
+            <div class="card">
+                <p><strong>10 GH/s</strong> - 0.99 €</p>
+                <button onclick="openPayment()">BUY NOW</button>
+            </div>
+            <div class="card">
+                <p><strong>50 GH/s</strong> - 1.99 €</p>
+                <button onclick="openPayment()">BUY NOW</button>
+            </div>
+            <div class="card">
+                <p><strong>100 GH/s</strong> - 5.99 €</p>
+                <button onclick="openPayment()">BUY NOW</button>
+            </div>
+            <div id="pay-info" class="card" style="display:none; border: 1px solid gold;">
+                <h4>Send TON to:</h4>
+                <div class="wallet-addr">UQA6wHjAHCQAwpFpT7fqnPDTljCSW3Q949qt8xGpGjTkgk3W</div>
+                <p style="font-size: 12px; margin-top: 10px;">Send the TON equivalent of the price. Speed will be added after 1 confirmation.</p>
+            </div>
+        </div>
+
+        <div id="p-mining" class="page">
+            <div style="text-align: center;">
+                <div class="mining-circle">
+                    <div class="balance" id="b-val">0.0000</div>
+                    <div class="price-tag" id="f-val">$0.00</div>
+                </div>
+                <button class="btn-mine" id="mine-btn" onclick="startMining()">START MINING</button>
+                <p style="margin-top: 20px;">Speed: <span id="s-val">5</span> GH/s</p>
+                <p id="timer" style="color: #666; font-size: 13px;"></p>
+            </div>
+        </div>
+
+        <div id="p-chart" class="page">
+            <h3>Market Status</h3>
+            <div class="card">
+                <canvas id="myChart"></canvas>
+            </div>
+        </div>
+
+        <div id="p-wallet" class="page">
+            <h3>Your Wallet</h3>
+            <div class="card">
+                <p>Withdraw (Min 100)</p>
+                <input type="text" placeholder="TON Wallet Address">
+                <input type="number" placeholder="Amount">
+                <button>WITHDRAW</button>
+            </div>
+            <div class="card">
+                <p>Send to Friend (Min 50)</p>
+                <input type="text" placeholder="Friend ID">
+                <input type="number" placeholder="Amount">
+                <button>SEND</button>
+            </div>
+        </div>
+
+        <div class="nav">
+            <i class="fas fa-user" onclick="nav('profile', this)"></i>
+            <i class="fas fa-shopping-cart" onclick="nav('shop', this)"></i>
+            <i class="fas fa-hammer active" onclick="nav('mining', this)"></i>
+            <i class="fas fa-chart-line" onclick="nav('chart', this)"></i>
+            <i class="fas fa-wallet" onclick="nav('wallet', this)"></i>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
+        import { getFirestore, doc, setDoc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyA-ErjzeDpm8hZfMaH6Pu41gZ1ldiOE6MA",
+            authDomain: "globalcoin-777.firebaseapp.com",
+            projectId: "globalcoin-777",
+            storageBucket: "globalcoin-777.firebasestorage.app",
+            messagingSenderId: "39757488621",
+            appId: "1:39757488621:web:02306af6eb69a2b62d87e4"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        let user = null;
+        let data = { balance: 0, speed: 5, lastMine: 0, name: "", invites: 0 };
+
+        // Check if user is already logged in
+        window.onload = async () => {
+            const savedId = localStorage.getItem('globalCoinId');
+            if (savedId) {
+                await loginUser(savedId);
+            }
+        };
+
+        window.handleLogin = async () => {
+            const name = document.getElementById('reg-name').value;
+            const phone = document.getElementById('reg-phone').value;
+            if (!name || !phone) return alert("Please fill all fields");
+
+            const id = "ID-" + phone.replace(/\+/g, '');
+            localStorage.setItem('globalCoinId', id);
+            await loginUser(id, name);
+        };
+
+        async function loginUser(id, name = "") {
+            const ref = doc(db, "users", id);
+            const snap = await getDoc(ref);
+
+            if (snap.exists()) {
+                data = snap.data();
+            } else {
+                data = { name: name, balance: 0, speed: 5, lastMine: 0, invites: 0 };
+                await setDoc(ref, data);
+            }
+
+            user = id;
+            document.getElementById('login-page').classList.remove('active');
+            document.getElementById('main-app').style.display = 'block';
+            updateUI();
+            checkOfflineMining();
+        }
+
+        window.nav = (p, el) => {
+            document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
+            document.querySelectorAll('.nav i').forEach(i => i.classList.remove('active'));
+            document.getElementById('p-' + p).classList.add('active');
+            el.classList.add('active');
+            if(p === 'chart') loadChart();
+        };
+
+        window.startMining = async () => {
+            const now = Date.now();
+            data.lastMine = now;
+            await updateDoc(doc(db, "users", user), { lastMine: now });
+            alert("Mining session active for 24h!");
+            updateUI();
+        };
+
+        function checkOfflineMining() {
+            if (data.lastMine > 0) {
+                const hours = (Date.now() - data.lastMine) / 3600000;
+                const activeHours = Math.min(hours, 24);
+                if (activeHours > 0) {
+                    const earned = activeHours * (data.speed / 10);
+                    data.balance += earned;
+                    data.lastMine = Date.now(); // Reset
+                    updateDoc(doc(db, "users", user), { balance: data.balance, lastMine: data.lastMine });
+                }
+            }
+        }
+
+        function updateUI() {
+            document.getElementById('u-name').innerText = data.name;
+            document.getElementById('u-id').innerText = user;
+            document.getElementById('b-val').innerText = data.balance.toFixed(4);
+            document.getElementById('f-val').innerText = "$" + (data.balance * 0.05).toFixed(2);
+            document.getElementById('s-val').innerText = data.speed;
+            document.getElementById('u-invites').innerText = data.invites;
+            document.getElementById('invite-url').value = window.location.href + "?ref=" + user;
+        }
+
+        window.openPayment = () => { document.getElementById('pay-info').style.display = 'block'; };
+
+        function loadChart() {
+            const ctx = document.getElementById('myChart');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['1', '2', '3', '4', '5'],
+                    datasets: [{ label: 'Price', data: [0.04, 0.06, 0.05, 0.07, 0.05], borderColor: '#bb86fc', tension: 0.3 }]
+                },
+                options: { plugins: { legend: { display: false } } }
+            });
+        }
+    </script>
+</body>
+</html>
