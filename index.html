@@ -1,0 +1,1049 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#0052ff">
+    <title>Lgbtcoin | Advanced Cloud Mining Network</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/css/intlTelInput.css">
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/intlTelInput.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
+    <style>
+        /* CSS VARIABLES FOR EASY THEME MANAGEMENT */
+        :root {
+            --primary: #0052ff;
+            --primary-hover: #0040cc;
+            --primary-light: rgba(0, 82, 255, 0.1);
+            --secondary: #0a192f;
+            --bg-color: #f4f7f9;
+            --surface: #ffffff;
+            --text-main: #12161c;
+            --text-muted: #707a8a;
+            --text-inverse: #ffffff;
+            --success: #02c076;
+            --success-light: rgba(2, 192, 118, 0.1);
+            --danger: #f6465d;
+            --danger-light: rgba(246, 70, 93, 0.1);
+            --warning: #f8d12f;
+            --border-color: #e2e8f0;
+            --shadow-sm: 0 2px 8px rgba(0,0,0,0.04);
+            --shadow-md: 0 8px 24px rgba(0,0,0,0.08);
+            --shadow-lg: 0 12px 32px rgba(0,0,0,0.12);
+            --radius-md: 16px;
+            --radius-lg: 24px;
+            --nav-height: 80px;
+            --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+
+        /* GLOBAL RESET & TYPOGRAPHY */
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { font-family: 'Inter', sans-serif; background-color: var(--bg-color); color: var(--text-main); line-height: 1.5; overflow-x: hidden; }
+        h1, h2, h3, h4, h5, h6 { font-weight: 800; letter-spacing: -0.5px; margin-bottom: 10px; }
+        p { color: var(--text-muted); margin-bottom: 15px; }
+        a { color: var(--primary); text-decoration: none; }
+        
+        /* APP CONTAINER LAYOUT */
+        .app-wrapper { max-width: 480px; margin: 0 auto; min-height: 100vh; background-color: var(--bg-color); position: relative; padding-bottom: var(--nav-height); box-shadow: 0 0 50px rgba(0,0,0,0.05); }
+
+        /* REUSABLE UI COMPONENTS */
+        .card { background: var(--surface); border-radius: var(--radius-lg); padding: 25px; box-shadow: var(--shadow-sm); margin-bottom: 20px; border: 1px solid var(--border-color); transition: var(--transition); }
+        .card:hover { box-shadow: var(--shadow-md); }
+        .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 15px; }
+        .card-header h3 { margin: 0; font-size: 18px; }
+        
+        /* BUTTONS */
+        .btn { display: inline-flex; align-items: center; justify-content: center; gap: 10px; padding: 16px 24px; border-radius: var(--radius-md); font-size: 16px; font-weight: 700; border: none; cursor: pointer; transition: var(--transition); width: 100%; outline: none; }
+        .btn-primary { background: var(--primary); color: var(--text-inverse); box-shadow: 0 8px 20px var(--primary-light); }
+        .btn-primary:active { transform: translateY(2px); box-shadow: 0 4px 10px var(--primary-light); background: var(--primary-hover); }
+        .btn-secondary { background: var(--secondary); color: var(--text-inverse); }
+        .btn-outline { background: transparent; border: 2px solid var(--primary); color: var(--primary); }
+        .btn-danger { background: var(--danger-light); color: var(--danger); }
+        
+        /* FORM ELEMENTS */
+        .form-group { margin-bottom: 20px; text-align: left; width: 100%; }
+        .form-label { display: block; font-size: 13px; font-weight: 700; color: var(--text-muted); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .form-control { width: 100%; padding: 16px 20px; border-radius: var(--radius-md); border: 2px solid var(--border-color); background: #f8fafc; font-size: 16px; transition: var(--transition); font-family: 'Inter', sans-serif; color: var(--text-main); }
+        .form-control:focus { border-color: var(--primary); background: var(--surface); box-shadow: 0 0 0 4px var(--primary-light); }
+        
+        /* AUTH SCREEN SPECIFICS */
+        #screen-auth { background: var(--surface); min-height: 100vh; display: flex; flex-direction: column; justify-content: center; padding: 40px 30px; position: absolute; top: 0; left: 0; width: 100%; z-index: 9999; }
+        .auth-logo-container { text-align: center; margin-bottom: 50px; }
+        .auth-icon { font-size: 48px; color: var(--primary); margin-bottom: 15px; display: inline-block; animation: float 3s ease-in-out infinite; }
+        .auth-title { font-size: 36px; font-weight: 900; background: linear-gradient(135deg, var(--primary), #8a2be2); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 5px; }
+        
+        @keyframes float { 0% { transform: translateY(0px); } 50% { transform: translateY(-10px); } 100% { transform: translateY(0px); } }
+
+        /* PAGE TRANSITIONS */
+        .page-section { display: none; padding: 25px 20px; animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; opacity: 0; transform: translateY(30px); }
+        .page-section.active { display: block; }
+        @keyframes slideUp { to { opacity: 1; transform: translateY(0); } }
+
+        /* BOTTOM NAVIGATION */
+        .bottom-nav { position: fixed; bottom: 0; width: 100%; max-width: 480px; height: var(--nav-height); background: var(--surface); border-top: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; z-index: 1000; padding: 0 15px; padding-bottom: env(safe-area-inset-bottom); box-shadow: 0 -10px 30px rgba(0,0,0,0.03); }
+        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--text-muted); text-decoration: none; height: 100%; cursor: pointer; transition: var(--transition); border-radius: 12px; }
+        .nav-item i { font-size: 24px; margin-bottom: 4px; transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .nav-item span { font-size: 11px; font-weight: 600; }
+        .nav-item:hover { background: #f8fafc; color: var(--primary); }
+        .nav-item.active { color: var(--primary); }
+        .nav-item.active i { transform: translateY(-3px) scale(1.1); }
+
+        /* --- DASHBOARD & MINING ENGINE --- */
+        .dashboard-header { text-align: center; padding: 10px 0 30px; }
+        .total-balance { font-size: 52px; font-weight: 900; letter-spacing: -2px; line-height: 1; margin: 10px 0; background: linear-gradient(to right, #1e2329, #474d57); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .fiat-value { font-size: 18px; color: var(--success); font-weight: 700; background: var(--success-light); padding: 6px 16px; border-radius: 20px; display: inline-block; }
+
+        /* THE ORB (MINING BUTTON) */
+        .orb-wrapper { position: relative; width: 280px; height: 280px; margin: 0 auto 40px; display: flex; align-items: center; justify-content: center; }
+        .orb-outer-ring { position: absolute; width: 100%; height: 100%; border-radius: 50%; border: 2px dashed var(--border-color); animation: spin 20s linear infinite; opacity: 0.5; }
+        .orb-inner { width: 220px; height: 220px; background: var(--surface); border-radius: 50%; box-shadow: var(--shadow-lg); display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; position: relative; z-index: 10; transition: all 0.4s ease; border: 8px solid #f8fafc; }
+        .orb-inner i { font-size: 60px; color: #cbd5e1; transition: var(--transition); }
+        .orb-label { margin-top: 15px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 2px; font-size: 14px; }
+        
+        .orb-inner.is-mining { border-color: var(--primary); box-shadow: 0 0 60px var(--primary-light); }
+        .orb-inner.is-mining i { color: var(--primary); animation: jiggle 2s infinite; }
+        .orb-inner.is-mining .orb-label { color: var(--primary); }
+        
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+        @keyframes jiggle { 0%, 100% { transform: rotate(-5deg) scale(1); } 50% { transform: rotate(5deg) scale(1.1); } }
+
+        /* MINING STATS GRID */
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .stat-box { background: #f8fafc; padding: 20px; border-radius: var(--radius-md); border: 1px solid var(--border-color); display: flex; flex-direction: column; align-items: flex-start; }
+        .stat-icon { width: 40px; height: 40px; border-radius: 10px; background: var(--surface); display: flex; align-items: center; justify-content: center; margin-bottom: 12px; font-size: 18px; box-shadow: var(--shadow-sm); }
+        .stat-value { font-size: 22px; font-weight: 800; color: var(--text-main); }
+        .stat-name { font-size: 12px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; }
+
+        /* --- MARKET PAGE --- */
+        .chart-wrapper { width: 100%; height: 300px; margin-top: 20px; position: relative; }
+        .market-data-row { display: flex; justify-content: space-between; align-items: center; padding: 16px 0; border-bottom: 1px solid var(--border-color); }
+        .market-data-row:last-child { border-bottom: none; }
+
+        /* --- SHOP PAGE --- */
+        .shop-list { display: flex; flex-direction: column; gap: 20px; }
+        .shop-item { background: var(--surface); border: 2px solid var(--border-color); border-radius: var(--radius-lg); overflow: hidden; transition: var(--transition); }
+        .shop-item:hover { border-color: var(--primary); transform: translateY(-5px); box-shadow: var(--shadow-lg); }
+        .shop-item-header { padding: 20px; background: #f8fafc; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); }
+        .shop-item-header h4 { margin: 0; font-size: 20px; }
+        .tier-badge { background: var(--primary-light); color: var(--primary); padding: 6px 12px; border-radius: 20px; font-weight: 800; font-size: 12px; }
+        .shop-item-body { padding: 20px; }
+        .shop-feature { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; font-size: 14px; color: var(--text-muted); font-weight: 500; }
+        .shop-feature i { color: var(--success); }
+
+        /* --- WALLET PAGE --- */
+        .wallet-hero { background: linear-gradient(135deg, var(--secondary), #1a365d); border-radius: var(--radius-lg); padding: 35px 25px; color: var(--text-inverse); text-align: center; position: relative; overflow: hidden; margin-bottom: 25px; box-shadow: 0 15px 35px rgba(10, 25, 47, 0.2); }
+        .wallet-hero::before { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 60%); pointer-events: none; }
+        .wallet-hero .balance-label { color: rgba(255,255,255,0.7); margin-bottom: 5px; }
+        .wallet-hero .main-balance { color: #fff; text-shadow: 0 2px 10px rgba(0,0,0,0.3); }
+
+        .tx-history-list { display: flex; flex-direction: column; gap: 15px; margin-top: 15px; }
+        .tx-item { display: flex; align-items: center; justify-content: space-between; padding: 15px; background: #f8fafc; border-radius: var(--radius-md); }
+        .tx-left { display: flex; align-items: center; gap: 15px; }
+        .tx-icon { width: 45px; height: 45px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+        .tx-icon.in { background: var(--success-light); color: var(--success); }
+        .tx-icon.out { background: var(--danger-light); color: var(--danger); }
+        .tx-details h5 { margin: 0 0 4px; font-size: 15px; }
+        .tx-details p { margin: 0; font-size: 12px; color: var(--text-muted); }
+        .tx-amount { font-weight: 800; font-size: 16px; }
+        .tx-amount.in { color: var(--success); }
+
+        /* --- PROFILE / SETTINGS --- */
+        .profile-header { display: flex; align-items: center; gap: 20px; padding: 10px 0 20px; border-bottom: 1px solid var(--border-color); margin-bottom: 25px; }
+        .avatar { width: 80px; height: 80px; border-radius: 50%; background: linear-gradient(135deg, var(--primary), #8a2be2); color: white; display: flex; align-items: center; justify-content: center; font-size: 32px; font-weight: 900; box-shadow: 0 10px 20px rgba(0,82,255,0.2); }
+        .profile-info h2 { margin: 0 0 5px; font-size: 24px; }
+        .profile-info p { margin: 0; font-size: 14px; }
+        
+        .settings-group { margin-bottom: 30px; }
+        .settings-item { display: flex; align-items: center; justify-content: space-between; padding: 18px; background: #f8fafc; border-radius: var(--radius-md); margin-bottom: 10px; cursor: pointer; transition: var(--transition); border: 1px solid transparent; }
+        .settings-item:hover { border-color: var(--primary-light); background: var(--surface); }
+        .settings-left { display: flex; align-items: center; gap: 15px; }
+        .settings-left i { font-size: 20px; color: var(--text-muted); width: 24px; text-align: center; }
+        .settings-left span { font-weight: 600; font-size: 15px; }
+
+        /* REFERRAL BOX */
+        .referral-box { background: linear-gradient(135deg, #f8fafc, #f1f5f9); border: 2px dashed var(--primary); padding: 30px; border-radius: var(--radius-lg); text-align: center; position: relative; overflow: hidden; margin-bottom: 30px; }
+        .ref-code-display { font-size: 36px; font-weight: 900; color: var(--primary); letter-spacing: 5px; margin: 20px 0; user-select: all; }
+
+        /* --- MODAL SYSTEM --- */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(10, 25, 47, 0.85); backdrop-filter: blur(8px); display: none; align-items: center; justify-content: center; z-index: 9999; opacity: 0; transition: opacity 0.3s ease; }
+        .modal-overlay.active { display: flex; opacity: 1; }
+        .modal-container { background: var(--surface); width: 90%; max-width: 420px; border-radius: var(--radius-lg); padding: 35px 25px; position: relative; transform: translateY(50px); transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); text-align: center; box-shadow: 0 25px 50px rgba(0,0,0,0.25); }
+        .modal-overlay.active .modal-container { transform: translateY(0); }
+        .modal-close { position: absolute; top: 20px; right: 20px; background: #f1f5f9; border: none; width: 36px; height: 36px; border-radius: 50%; font-size: 16px; color: var(--text-muted); cursor: pointer; transition: var(--transition); display: flex; align-items: center; justify-content: center; }
+        .modal-close:hover { background: var(--danger-light); color: var(--danger); transform: rotate(90deg); }
+        .wallet-address-box { background: #f8fafc; border: 2px solid var(--border-color); padding: 20px; border-radius: var(--radius-md); font-family: 'Courier New', Courier, monospace; font-size: 14px; font-weight: 800; color: var(--secondary); word-break: break-all; margin: 25px 0; }
+
+        /* --- TOAST NOTIFICATIONS --- */
+        #toast-container { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 10000; display: flex; flex-direction: column; gap: 10px; width: 90%; max-width: 400px; pointer-events: none; }
+        .toast { background: var(--surface); border-left: 6px solid var(--primary); padding: 16px 20px; border-radius: var(--radius-md); box-shadow: var(--shadow-lg); display: flex; align-items: center; gap: 15px; animation: toastIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; pointer-events: all; }
+        .toast.success { border-color: var(--success); }
+        .toast.error { border-color: var(--danger); }
+        .toast-icon { font-size: 24px; }
+        .toast.success .toast-icon { color: var(--success); }
+        .toast.error .toast-icon { color: var(--danger); }
+        .toast-content h4 { margin: 0 0 4px; font-size: 15px; }
+        .toast-content p { margin: 0; font-size: 13px; color: var(--text-muted); }
+        @keyframes toastIn { from { transform: translateY(-50px) scale(0.9); opacity: 0; } to { transform: translateY(0) scale(1); opacity: 1; } }
+        @keyframes toastOut { to { transform: translateY(-20px); opacity: 0; } }
+
+        /* UTILITIES */
+        .text-center { text-align: center; }
+        .mt-4 { margin-top: 1.5rem; }
+        .mb-4 { margin-bottom: 1.5rem; }
+        .text-primary { color: var(--primary); }
+    </style>
+</head>
+<body>
+
+<div class="app-wrapper">
+
+    <div id="toast-container"></div>
+
+    <section id="screen-auth">
+        <div class="auth-logo-container">
+            <i class="fa-solid fa-link auth-icon"></i>
+            <h1 class="auth-title">Lgbtcoin</h1>
+            <p>Decentralized Cloud Mining Protocol v2.0</p>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Full Legal Name</label>
+            <input type="text" class="form-control" id="reg-name" placeholder="E.g. Alexander Smith" required>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Email Address</label>
+            <input type="email" class="form-control" id="reg-email" placeholder="alex@domain.com" required>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 25px;">
+            <label class="form-label">Verified Mobile Number</label>
+            <input type="tel" class="form-control" id="phone" required>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Network Invite Code (Optional)</label>
+            <input type="text" class="form-control" id="reg-invite" placeholder="LGBT-XXXX">
+            <small style="color: var(--text-muted); font-size: 12px; margin-top: 5px; display: block;">Leave blank if you don't have a sponsor.</small>
+        </div>
+
+        <button class="btn btn-primary mt-4" onclick="handleRegistration()">
+            <i class="fa-solid fa-shield-halved"></i> Initialize Secure Account
+        </button>
+        
+        <p class="text-center" style="font-size: 12px; margin-top: 25px;">
+            <i class="fa-solid fa-lock text-primary"></i> 256-bit AES Encryption. <br>Your data is securely stored on the blockchain ledger.
+        </p>
+    </section>
+
+    <section id="view-dashboard" class="page-section active">
+        <div class="card" style="background: linear-gradient(180deg, #ffffff, #f8fafc);">
+            <div class="dashboard-header">
+                <p class="form-label">Real-Time Portfolio Value</p>
+                <h1 class="total-balance" id="dash-balance">0.000000</h1>
+                <div class="fiat-value"><i class="fa-solid fa-euro-sign"></i> <span id="dash-fiat">0.00</span> EUR</div>
+            </div>
+
+            <div class="orb-wrapper">
+                <div class="orb-outer-ring"></div>
+                <div class="orb-inner" id="btn-mine" onclick="toggleMiningState()">
+                    <i class="fa-solid fa-power-off"></i>
+                    <span class="orb-label" id="txt-mine-status">System Offline</span>
+                </div>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-box">
+                    <div class="stat-icon" style="color: var(--primary);"><i class="fa-solid fa-gauge-high"></i></div>
+                    <div class="stat-value" id="dash-speed">0 <span style="font-size:14px;color:var(--text-muted)">GH/s</span></div>
+                    <div class="stat-name">Active Hashrate</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-icon" style="color: var(--warning);"><i class="fa-solid fa-fire-flame-curved"></i></div>
+                    <div class="stat-value" id="dash-temp">42°C</div>
+                    <div class="stat-name">Server Temp</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-icon" style="color: var(--success);"><i class="fa-solid fa-server"></i></div>
+                    <div class="stat-value text-success">Online</div>
+                    <div class="stat-name">Network Status</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-icon" style="color: #8a2be2;"><i class="fa-solid fa-users-rays"></i></div>
+                    <div class="stat-value" id="dash-ref">0</div>
+                    <div class="stat-name">Active Referrals</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="view-shop" class="page-section">
+        <h2 class="section-title">Upgrade Hardware</h2>
+        <p>Purchase additional computing power to multiply your daily crypto generation rate.</p>
+
+        <div class="shop-list">
+            <div class="shop-item">
+                <div class="shop-item-header">
+                    <div>
+                        <h4 style="margin-bottom: 5px;">Starter Rig</h4>
+                        <span class="tier-badge">Tier 1</span>
+                    </div>
+                    <h3 style="margin: 0; color: var(--primary);">€3.99</h3>
+                </div>
+                <div class="shop-item-body">
+                    <div class="shop-feature"><i class="fa-solid fa-circle-check"></i> <b>+10 GH/s</b> Permanent Hashrate</div>
+                    <div class="shop-feature"><i class="fa-solid fa-circle-check"></i> Standard Priority Processing</div>
+                    <div class="shop-feature"><i class="fa-solid fa-circle-check"></i> 24/7 Uptime Guarantee</div>
+                    <button class="btn btn-outline mt-4" onclick="initiatePayment('Starter Rig (10 GH/s)', '3.99')">
+                        Deploy Contract
+                    </button>
+                </div>
+            </div>
+
+            <div class="shop-item" style="border-color: var(--primary); box-shadow: 0 10px 30px var(--primary-light);">
+                <div class="shop-item-header" style="background: var(--primary); color: white;">
+                    <div>
+                        <h4 style="margin-bottom: 5px; color: white;">Pro Miner</h4>
+                        <span class="tier-badge" style="background: rgba(255,255,255,0.2); color: white;">Tier 2 (Most Popular)</span>
+                    </div>
+                    <h3 style="margin: 0; color: white;">€6.99</h3>
+                </div>
+                <div class="shop-item-body">
+                    <div class="shop-feature"><i class="fa-solid fa-bolt text-primary"></i> <b class="text-primary">+50 GH/s</b> Permanent Hashrate</div>
+                    <div class="shop-feature"><i class="fa-solid fa-circle-check"></i> High Priority Processing</div>
+                    <div class="shop-feature"><i class="fa-solid fa-circle-check"></i> Liquid Cooling Servers</div>
+                    <button class="btn btn-primary mt-4" onclick="initiatePayment('Pro Miner (50 GH/s)', '6.99')">
+                        Deploy Pro Contract
+                    </button>
+                </div>
+            </div>
+
+            <div class="shop-item">
+                <div class="shop-item-header" style="background: #111;">
+                    <div>
+                        <h4 style="margin-bottom: 5px; color: white;">Enterprise Farm</h4>
+                        <span class="tier-badge" style="background: #333; color: var(--warning);">Tier 3</span>
+                    </div>
+                    <h3 style="margin: 0; color: white;">€10.99</h3>
+                </div>
+                <div class="shop-item-body">
+                    <div class="shop-feature"><i class="fa-solid fa-rocket" style="color: var(--warning);"></i> <b>+100 GH/s</b> Permanent Hashrate</div>
+                    <div class="shop-feature"><i class="fa-solid fa-circle-check"></i> Maximum Priority Lane</div>
+                    <div class="shop-feature"><i class="fa-solid fa-circle-check"></i> VIP Dedicated Support</div>
+                    <button class="btn btn-secondary mt-4" onclick="initiatePayment('Enterprise Farm (100 GH/s)', '10.99')">
+                        Deploy Enterprise Contract
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="view-market" class="page-section">
+        <h2 class="section-title">Market Analysis</h2>
+        
+        <div class="card">
+            <div class="card-header">
+                <h3>Lgbtcoin (LGC) / EUR</h3>
+                <h3 class="text-primary" id="market-current-price">€0.00</h3>
+            </div>
+            <div class="chart-wrapper">
+                <canvas id="mainCryptoChart"></canvas>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3 style="margin-bottom: 15px; font-size: 16px;">Network Statistics</h3>
+            <div class="market-data-row">
+                <span style="color: var(--text-muted);"><i class="fa-solid fa-chart-pie"></i> Market Capitalization</span>
+                <span style="font-weight: 700;">€45,291,040</span>
+            </div>
+            <div class="market-data-row">
+                <span style="color: var(--text-muted);"><i class="fa-solid fa-money-bill-trend-up"></i> 24h Trading Volume</span>
+                <span style="font-weight: 700; color: var(--success);">+14.2%</span>
+            </div>
+            <div class="market-data-row">
+                <span style="color: var(--text-muted);"><i class="fa-solid fa-hammer"></i> Network Difficulty</span>
+                <span style="font-weight: 700;">8.4T</span>
+            </div>
+            <div class="market-data-row">
+                <span style="color: var(--text-muted);"><i class="fa-solid fa-users"></i> Global Active Miners</span>
+                <span style="font-weight: 700;">142,809</span>
+            </div>
+        </div>
+    </section>
+
+    <section id="view-wallet" class="page-section">
+        <div class="wallet-hero">
+            <p class="form-label" style="color: rgba(255,255,255,0.7);">Total Liquid Assets</p>
+            <h1 class="total-balance" style="background: none; -webkit-text-fill-color: white; font-size: 48px;" id="wallet-main-bal">0.00</h1>
+            <p style="font-size: 14px; opacity: 0.8; margin-top: 5px;">Ready for immediate withdrawal</p>
+        </div>
+
+        <div class="card">
+            <h3 style="margin-bottom: 5px;"><i class="fa-solid fa-paper-plane text-primary"></i> P2P Network Transfer</h3>
+            <p style="font-size: 13px; margin-bottom: 20px;">Send coins instantly to any user on the network with zero gas fees.</p>
+            
+            <div class="form-group">
+                <label class="form-label">Recipient Mobile Number</label>
+                <input type="number" class="form-control" id="p2p-target" placeholder="E.g. 35988...">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Amount to Send (Min. 50)</label>
+                <input type="number" class="form-control" id="p2p-amount" placeholder="0.00">
+            </div>
+            <button class="btn btn-secondary" onclick="executeP2PTransfer()">Execute Transfer</button>
+        </div>
+
+        <div class="card">
+            <h3 style="margin-bottom: 5px;"><i class="fa-brands fa-ethereum text-primary"></i> Withdraw to Wallet</h3>
+            <p style="font-size: 13px; margin-bottom: 20px;">Bridge your assets to the external TON blockchain network.</p>
+            
+            <div class="form-group">
+                <label class="form-label">Destination TON Address</label>
+                <input type="text" class="form-control" id="ext-wallet-addr" placeholder="UQ...">
+            </div>
+            <button class="btn btn-outline" onclick="requestWithdrawal()">Submit Request</button>
+        </div>
+
+        <h3 class="section-title" style="font-size: 18px; margin-top: 30px;">Recent Activity</h3>
+        <div class="tx-history-list" id="tx-log-container">
+            </div>
+    </section>
+
+    <section id="view-profile" class="page-section">
+        <div class="profile-header">
+            <div class="avatar" id="prof-avatar">?</div>
+            <div class="profile-info">
+                <h2 id="prof-name">Loading...</h2>
+                <p id="prof-email" style="color: var(--text-muted);"><i class="fa-solid fa-envelope"></i> loading...</p>
+                <p id="prof-phone" style="color: var(--text-muted); margin-top: 4px;"><i class="fa-solid fa-phone"></i> loading...</p>
+            </div>
+        </div>
+
+        <div class="referral-box">
+            <div style="position: absolute; top: -20px; right: -20px; font-size: 120px; color: rgba(0,82,255,0.05); transform: rotate(-15deg); pointer-events: none;"><i class="fa-solid fa-gift"></i></div>
+            <h3 style="position: relative; z-index: 1;">Affiliate Program</h3>
+            <p style="font-size: 13px; position: relative; z-index: 1;">Build your mining empire. Invite 10 active friends and receive a massive <b>+10 GH/s</b> permanent speed boost!</p>
+            
+            <div class="ref-code-display" id="prof-code" onclick="copyMyInviteCode()" title="Click to copy">LGBT-0000</div>
+            <button class="btn btn-primary" onclick="copyMyInviteCode()"><i class="fa-regular fa-copy"></i> Copy Referral Link</button>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 25px;">
+                <div style="background: white; padding: 15px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.05);">
+                    <div style="font-size: 28px; font-weight: 900; color: var(--secondary);" id="prof-ref-count">0</div>
+                    <div style="font-size: 11px; font-weight: 700; color: var(--text-muted);">TEAM SIZE</div>
+                </div>
+                <div style="background: white; padding: 15px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.05);">
+                    <div style="font-size: 28px; font-weight: 900; color: var(--success);" id="prof-ref-bonus">0</div>
+                    <div style="font-size: 11px; font-weight: 700; color: var(--text-muted);">BONUS GH/s</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card" style="padding: 10px;">
+            <div class="settings-item" onclick="showToast('Verification System', 'Your account is already Level 2 KYC Verified.', 'success')">
+                <div class="settings-left">
+                    <i class="fa-solid fa-shield-check text-success"></i>
+                    <span>Identity Verification</span>
+                </div>
+                <i class="fa-solid fa-chevron-right" style="color: var(--border-color);"></i>
+            </div>
+            <div class="settings-item" onclick="showToast('Security Options', 'Biometric login is currently enabled.', 'info')">
+                <div class="settings-left">
+                    <i class="fa-solid fa-fingerprint text-primary"></i>
+                    <span>Security & Login</span>
+                </div>
+                <i class="fa-solid fa-chevron-right" style="color: var(--border-color);"></i>
+            </div>
+            <div class="settings-item" onclick="showToast('Help Center', 'Our support agents are currently busy. Try again later.', 'error')">
+                <div class="settings-left">
+                    <i class="fa-solid fa-headset text-warning"></i>
+                    <span>24/7 Support Center</span>
+                </div>
+                <i class="fa-solid fa-chevron-right" style="color: var(--border-color);"></i>
+            </div>
+        </div>
+
+        <button class="btn btn-outline" style="border-color: var(--danger); color: var(--danger); margin-top: 20px;" onclick="location.reload()">
+            <i class="fa-solid fa-arrow-right-from-bracket"></i> Disconnect Session
+        </button>
+    </section>
+
+    <nav class="bottom-nav" id="app-navigation" style="display: none;">
+        <a class="nav-item active" onclick="switchView('dashboard', this)">
+            <i class="fa-solid fa-house"></i>
+            <span>Home</span>
+        </a>
+        <a class="nav-item" onclick="switchView('shop', this)">
+            <i class="fa-solid fa-microchip"></i>
+            <span>Hardware</span>
+        </a>
+        <a class="nav-item" onclick="switchView('market', this)">
+            <i class="fa-solid fa-chart-line"></i>
+            <span>Market</span>
+        </a>
+        <a class="nav-item" onclick="switchView('wallet', this)">
+            <i class="fa-solid fa-wallet"></i>
+            <span>Wallet</span>
+        </a>
+        <a class="nav-item" onclick="switchView('profile', this)">
+            <i class="fa-solid fa-user-astronaut"></i>
+            <span>Profile</span>
+        </a>
+    </nav>
+
+    <div class="modal-overlay" id="checkout-modal">
+        <div class="modal-container">
+            <button class="modal-close" onclick="closeModal()"><i class="fa-solid fa-xmark"></i></button>
+            
+            <div style="width: 80px; height: 80px; border-radius: 50%; background: var(--primary-light); color: var(--primary); display: flex; align-items: center; justify-content: center; font-size: 36px; margin: 0 auto 20px;">
+                <i class="fa-brands fa-telegram"></i>
+            </div>
+            
+            <h2 id="modal-title">Initiate Contract</h2>
+            <p style="margin-bottom: 20px;">To securely deploy the <b id="modal-product" class="text-primary">---</b>, please transfer exactly <b id="modal-cost" class="text-main" style="font-size:18px;">0.00 EUR</b> worth of TON cryptocurrency to the official smart contract address below:</p>
+            
+            <div class="wallet-address-box" id="official-wallet-address">UQA6wHjAHCQAwpFpT7fqnPDTljCSW3Q949qt8xGpGjTkgk3W</div>
+            
+            <button class="btn btn-primary" onclick="copyOfficialWallet()">
+                <i class="fa-regular fa-copy"></i> Copy TON Address
+            </button>
+            
+            <div style="background: #fffbeb; padding: 15px; border-radius: 12px; margin-top: 25px; text-align: left; border: 1px solid #fef3c7;">
+                <h4 style="color: #92400e; font-size: 14px; margin-bottom: 5px;"><i class="fa-solid fa-circle-exclamation"></i> Important Instructions</h4>
+                <ol style="color: #b45309; font-size: 12px; padding-left: 15px; margin: 0;">
+                    <li style="margin-bottom: 5px;">Copy the exact address above.</li>
+                    <li style="margin-bottom: 5px;">Use any TON compatible wallet (e.g., Telegram Wallet, Tonkeeper).</li>
+                    <li>Power is automatically credited within 10 minutes of block confirmation.</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    /**
+     * ------------------------------------------------------------------------
+     * FIREBASE CLOUD CONFIGURATION
+     * ------------------------------------------------------------------------
+     * Connected to the GlobalCryptoCoin database. All users and transactions
+     * are synchronized here in real-time.
+     */
+    const firebaseConfig = {
+        apiKey: "AIzaSyCaTU9cqd77gkhtTkRseEpgC3UNzzCWDls",
+        authDomain: "globalcriptocoin.firebaseapp.com",
+        projectId: "globalcriptocoin",
+        storageBucket: "globalcriptocoin.firebasestorage.app",
+        messagingSenderId: "1020661985571",
+        appId: "1:1020661985571:web:d0ea8c84b3eeb918c99c96",
+        measurementId: "G-ZY252P34MV"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+    
+    // Global Application State Variables
+    let currentUserData = null;
+    let currentUserPhoneStr = "";
+    let systemMiningInterval = null;
+    let currentMarketPriceEUR = 0.55;
+    let chartInstance = null;
+
+    /**
+     * ------------------------------------------------------------------------
+     * UI & NOTIFICATION SYSTEM (TOASTS)
+     * ------------------------------------------------------------------------
+     */
+    function showToast(title, message, type = 'success') {
+        const container = document.getElementById('toast-container');
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
+        
+        let icon = type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-circle-exclamation' : 'fa-info-circle';
+        
+        toast.innerHTML = `
+            <div class="toast-icon"><i class="fa-solid ${icon}"></i></div>
+            <div class="toast-content">
+                <h4>${title}</h4>
+                <p>${message}</p>
+            </div>
+        `;
+        
+        container.appendChild(toast);
+        
+        // Auto-remove animation
+        setTimeout(() => {
+            toast.style.animation = 'toastOut 0.3s forwards';
+            setTimeout(() => toast.remove(), 300);
+        }, 4000);
+    }
+
+    /**
+     * ------------------------------------------------------------------------
+     * TELEPHONY SETUP (INTL-TEL-INPUT)
+     * ------------------------------------------------------------------------
+     */
+    const phoneInputField = document.querySelector("#phone");
+    const phoneInputSetup = window.intlTelInput(phoneInputField, {
+        initialCountry: "auto",
+        geoIpLookup: callback => {
+            fetch("https://ipapi.co/json")
+                .then(res => res.json())
+                .then(data => callback(data.country_code))
+                .catch(() => callback("us")); // Fallback
+        },
+        utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/utils.js",
+        separateDialCode: true
+    });
+
+    /**
+     * ------------------------------------------------------------------------
+     * AUTHENTICATION & REGISTRATION LOGIC
+     * ------------------------------------------------------------------------
+     */
+    function handleRegistration() {
+        const rawName = document.getElementById('reg-name').value.trim();
+        const rawEmail = document.getElementById('reg-email').value.trim();
+        const rawInvite = document.getElementById('reg-invite').value.trim();
+        const phoneNumber = phoneInputSetup.getNumber().replace(/\D/g, ''); // Extract digits only
+
+        // Input Validation
+        if(rawName.length < 3) return showToast("Validation Error", "Please enter your full legal name.", "error");
+        if(!rawEmail.includes('@')) return showToast("Validation Error", "Please enter a valid email address.", "error");
+        if(phoneNumber.length < 8) return showToast("Validation Error", "Invalid mobile number format.", "error");
+
+        currentUserPhoneStr = phoneNumber;
+        const userNodeRef = database.ref('lgbt_users/' + phoneNumber);
+
+        // Check if user exists, otherwise create
+        userNodeRef.once('value').then(snapshot => {
+            if(!snapshot.exists()) {
+                // Generate a unique 4-digit code appended to LGBT-
+                const newInviteCode = "LGBT-" + Math.floor(1000 + Math.random() * 9000);
+                
+                // Define the comprehensive user schema
+                const userSchema = {
+                    profile: {
+                        name: rawName,
+                        email: rawEmail,
+                        phone: phoneNumber,
+                        invite_code: newInviteCode,
+                        joined_at: Date.now()
+                    },
+                    mining_engine: {
+                        balance: 0.000000,
+                        speed_ghs: 5, // Base starter speed
+                        is_active: false,
+                        last_calculated_at: Date.now()
+                    },
+                    network: {
+                        total_invited: 0,
+                        bonus_speed_ghs: 0,
+                        sponsor_code: rawInvite || 'SYSTEM_ROOT'
+                    }
+                };
+
+                // Write to database
+                userNodeRef.set(userSchema).then(() => {
+                    showToast("Account Created", "Your wallet has been secured.", "success");
+                    if(rawInvite) executeReferralLogic(rawInvite);
+                });
+            } else {
+                showToast("Welcome Back", "Authentication successful.", "success");
+            }
+            
+            // Proceed to load dashboard
+            initializeApplicationEnvironment();
+        }).catch(err => {
+            showToast("System Error", "Database connection failed. Please try again.", "error");
+            console.error(err);
+        });
+    }
+
+    /**
+     * ------------------------------------------------------------------------
+     * REFERRAL (AFFILIATE) PROCESSING ALGORITHM
+     * ------------------------------------------------------------------------
+     */
+    function executeReferralLogic(sponsorCodeUsed) {
+        // Search the entire user base for the matching sponsor code
+        database.ref('lgbt_users').orderByChild('profile/invite_code').equalTo(sponsorCodeUsed).once('value', snapshot => {
+            if(snapshot.exists()) {
+                // Get the sponsor's unique phone identifier
+                const sponsorPhoneId = Object.keys(snapshot.val())[0];
+                const sponsorNetworkRef = database.ref('lgbt_users/' + sponsorPhoneId + '/network');
+                
+                // Use a transaction to safely increment values preventing race conditions
+                sponsorNetworkRef.transaction(networkData => {
+                    if(networkData) {
+                        networkData.total_invited++;
+                        
+                        // Every 10 invites = +10 GH/s bonus logic
+                        if(networkData.total_invited % 10 === 0) {
+                            networkData.bonus_speed_ghs += 10;
+                            // Also directly update their mining engine speed
+                            const engineSpeedRef = database.ref('lgbt_users/' + sponsorPhoneId + '/mining_engine/speed_ghs');
+                            engineSpeedRef.transaction(currentSpeed => (currentSpeed || 5) + 10);
+                        }
+                    }
+                    return networkData;
+                });
+            }
+        });
+    }
+
+    /**
+     * ------------------------------------------------------------------------
+     * MAIN APPLICATION INITIALIZATION
+     * ------------------------------------------------------------------------
+     */
+    function initializeApplicationEnvironment() {
+        // Hide Auth, Show Nav and Dashboard
+        document.getElementById('screen-auth').style.display = 'none';
+        document.getElementById('app-navigation').style.display = 'flex';
+        switchView('dashboard', document.querySelector('.nav-item'));
+
+        // Setup real-time listener for current user
+        const userNodeRef = database.ref('lgbt_users/' + currentUserPhoneStr);
+        
+        userNodeRef.on('value', snapshot => {
+            currentUserData = snapshot.val();
+            if(!currentUserData) return;
+
+            // 1. Update Profile UI
+            document.getElementById('prof-name').innerText = currentUserData.profile.name;
+            document.getElementById('prof-email').innerHTML = `<i class="fa-solid fa-envelope"></i> ${currentUserData.profile.email}`;
+            document.getElementById('prof-phone').innerHTML = `<i class="fa-solid fa-phone"></i> +${currentUserData.profile.phone}`;
+            document.getElementById('prof-code').innerText = currentUserData.profile.invite_code;
+            
+            // Extract initials for avatar
+            const names = currentUserData.profile.name.split(' ');
+            const initials = names.length > 1 ? names[0][0] + names[1][0] : names[0][0];
+            document.getElementById('user-initials').innerText = initials.toUpperCase();
+
+            // 2. Update Network/Referral UI
+            document.getElementById('prof-ref-count').innerText = currentUserData.network.total_invited;
+            document.getElementById('prof-ref-bonus').innerText = currentUserData.network.bonus_speed_ghs;
+            document.getElementById('dash-ref').innerText = currentUserData.network.total_invited;
+
+            // 3. Update Mining Engine UI
+            document.getElementById('dash-speed').innerHTML = `${currentUserData.mining_engine.speed_ghs} <span style="font-size:14px;color:var(--text-muted)">GH/s</span>`;
+            
+            // Process Core Mining Math
+            processBackgroundMining(currentUserData.mining_engine);
+        });
+
+        // Setup global settings listener (Market Price)
+        database.ref('system_config/market_price_eur').on('value', snapshot => {
+            currentMarketPriceEUR = snapshot.val() || 0.55; // Default fallback
+            document.getElementById('market-current-price').innerText = `€${currentMarketPriceEUR.toFixed(2)}`;
+            
+            // Force an update to fiat displays
+            if(currentUserData) {
+                const bal = currentUserData.mining_engine.balance;
+                document.getElementById('dash-fiat').innerText = (bal * currentMarketPriceEUR).toFixed(2);
+            }
+        });
+
+        // Initialize fake history logs for visual effect
+        generateSimulatedTransactionHistory();
+    }
+
+    /**
+     * ------------------------------------------------------------------------
+     * MATHEMATICAL MINING ENGINE (CLOUD CALCULATION)
+     * ------------------------------------------------------------------------
+     * Calculates coins generated while the user was offline, then starts a
+     * visual ticker to update the UI every second if the miner is active.
+     */
+    function processBackgroundMining(engineData) {
+        // Clear any existing ticker
+        if(systemMiningInterval) clearInterval(systemMiningInterval);
+
+        const orbInner = document.getElementById('btn-mine');
+        const orbText = document.getElementById('txt-mine-status');
+
+        if(engineData.is_active) {
+            // Stylize the active state
+            orbInner.classList.add('is-mining');
+            orbText.innerText = "System Active";
+            document.getElementById('dash-temp').innerText = (42 + Math.floor(Math.random()*15)) + "°C"; // Randomize temp
+
+            // Calculate offline earnings
+            const currentTimestamp = Date.now();
+            const timePassedSeconds = (currentTimestamp - engineData.last_calculated_at) / 1000;
+            
+            // Algorithm: 1 GH/s produces 0.00001 coins per second
+            const multiplier = 0.00001;
+            const coinsMinedOffline = timePassedSeconds * (engineData.speed_ghs * multiplier);
+            
+            let rollingBalance = engineData.balance + coinsMinedOffline;
+
+            // Start the visual 1-second ticker
+            systemMiningInterval = setInterval(() => {
+                rollingBalance += (engineData.speed_ghs * multiplier);
+                
+                // Update specific UI nodes
+                document.getElementById('dash-balance').innerText = rollingBalance.toFixed(6);
+                document.getElementById('wallet-main-bal').innerText = rollingBalance.toFixed(2);
+                document.getElementById('dash-fiat').innerText = (rollingBalance * currentMarketPriceEUR).toFixed(2);
+
+                // Save state to Firebase every 10 seconds to prevent huge API usage bills
+                if(Math.floor(Date.now() / 1000) % 10 === 0) {
+                    database.ref('lgbt_users/' + currentUserPhoneStr + '/mining_engine').update({
+                        balance: rollingBalance,
+                        last_calculated_at: Date.now()
+                    });
+                }
+            }, 1000);
+
+        } else {
+            // Inactive State Handling
+            orbInner.classList.remove('is-mining');
+            orbText.innerText = "System Offline";
+            document.getElementById('dash-temp').innerText = "24°C"; // Cool temp
+            
+            // Just display the static balance
+            document.getElementById('dash-balance').innerText = engineData.balance.toFixed(6);
+            document.getElementById('wallet-main-bal').innerText = engineData.balance.toFixed(2);
+            document.getElementById('dash-fiat').innerText = (engineData.balance * currentMarketPriceEUR).toFixed(2);
+        }
+    }
+
+    // Toggle the power switch
+    function toggleMiningState() {
+        if(!currentUserData) return;
+        const currentActiveState = currentUserData.mining_engine.is_active;
+        
+        // Flip the boolean and reset the clock
+        database.ref('lgbt_users/' + currentUserPhoneStr + '/mining_engine').update({
+            is_active: !currentActiveState,
+            last_calculated_at: Date.now() // Reset timer exactly when switched
+        });
+
+        const statusMsg = !currentActiveState ? "Mining hardware started successfully." : "Mining hardware safely powered down.";
+        const statusType = !currentActiveState ? "success" : "info";
+        showToast("Power State Changed", statusMsg, statusType);
+    }
+
+    /**
+     * ------------------------------------------------------------------------
+     * P2P TRANSFERS (DATABASE TRANSACTIONS)
+     * ------------------------------------------------------------------------
+     */
+    function executeP2PTransfer() {
+        const targetPhone = document.getElementById('p2p-target').value.replace(/\D/g, '');
+        const amountStr = document.getElementById('p2p-amount').value;
+        const amount = parseFloat(amountStr);
+
+        // Validations
+        if(!targetPhone || targetPhone === currentUserPhoneStr) return showToast("Error", "Invalid recipient number.", "error");
+        if(isNaN(amount) || amount < 50) return showToast("Error", "Minimum transfer amount is 50 coins.", "error");
+
+        const myEngineRef = database.ref('lgbt_users/' + currentUserPhoneStr + '/mining_engine');
+        
+        // 1. Verify my balance
+        myEngineRef.once('value').then(mySnap => {
+            const myCurrentBal = mySnap.val().balance;
+            if(myCurrentBal < amount) return showToast("Insufficient Funds", "Your liquid balance is too low.", "error");
+
+            // 2. Locate target user
+            const targetEngineRef = database.ref('lgbt_users/' + targetPhone + '/mining_engine');
+            targetEngineRef.once('value').then(targetSnap => {
+                if(!targetSnap.exists()) return showToast("Not Found", "Recipient does not exist on the network.", "error");
+
+                // 3. Execute dual update (Deduct from sender, Add to receiver)
+                myEngineRef.update({ balance: myCurrentBal - amount });
+                
+                targetEngineRef.transaction(targetEngine => {
+                    if(targetEngine) { targetEngine.balance += amount; }
+                    return targetEngine;
+                }).then(() => {
+                    // Success!
+                    showToast("Transfer Complete", `Successfully sent ${amount} coins to +${targetPhone}.`, "success");
+                    document.getElementById('p2p-target').value = '';
+                    document.getElementById('p2p-amount').value = '';
+                    
+                    // Add to local visual history
+                    addTransactionToVisualLog('out', `Transfer to +${targetPhone}`, amount);
+                });
+            });
+        });
+    }
+
+    function requestWithdrawal() {
+        const address = document.getElementById('ext-wallet-addr').value.trim();
+        if(address.length < 15) return showToast("Invalid Address", "Please enter a valid TON blockchain address.", "error");
+        
+        showToast("Request Submitted", "Your withdrawal is being processed by the network. This can take up to 24h.", "info");
+        document.getElementById('ext-wallet-addr').value = '';
+    }
+
+    /**
+     * ------------------------------------------------------------------------
+     * VISUAL DATA GENERATION (CHART & HISTORY)
+     * ------------------------------------------------------------------------
+     */
+    function renderMarketChart() {
+        if(chartInstance) return; // Prevent multiple canvas instances
+
+        const ctx = document.getElementById('mainCryptoChart').getContext('2d');
+        
+        // Create Gradient Fill
+        let gradient = ctx.createLinearGradient(0, 0, 0, 300);
+        gradient.addColorStop(0, 'rgba(0, 82, 255, 0.4)');
+        gradient.addColorStop(1, 'rgba(0, 82, 255, 0.0)');
+
+        chartInstance = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00', '24:00'],
+                datasets: [{
+                    label: 'Market Price (EUR)',
+                    data: [0.42, 0.45, 0.41, 0.50, 0.48, 0.52, 0.55], // Simulated data points
+                    borderColor: '#0052ff',
+                    borderWidth: 3,
+                    backgroundColor: gradient,
+                    fill: true,
+                    tension: 0.4, // Curvy lines
+                    pointRadius: 4,
+                    pointBackgroundColor: '#ffffff',
+                    pointBorderColor: '#0052ff',
+                    pointBorderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: { grid: { display: false, drawBorder: false } },
+                    y: { grid: { borderDash: [5, 5], color: '#e2e8f0', drawBorder: false }, ticks: { padding: 10 } }
+                },
+                interaction: { intersect: false, mode: 'index' }
+            }
+        });
+    }
+
+    function generateSimulatedTransactionHistory() {
+        const container = document.getElementById('tx-log-container');
+        // Clear old
+        container.innerHTML = '';
+        
+        // Create some dummy data to make the wallet look active
+        const dummyLogs = [
+            { type: 'in', title: 'Mining Reward Pool', date: 'Today, 14:30', amount: '+12.450' },
+            { type: 'out', title: 'Hardware Upgrade', date: 'Yesterday, 09:15', amount: '-150.00' },
+            { type: 'in', title: 'Affiliate Bonus', date: 'Apr 02, 11:20', amount: '+50.000' }
+        ];
+
+        dummyLogs.forEach(log => {
+            const el = document.createElement('div');
+            el.className = 'tx-item';
+            
+            const iconClass = log.type === 'in' ? 'fa-arrow-down' : 'fa-arrow-up';
+            const valClass = log.type === 'in' ? 'in' : 'out';
+
+            el.innerHTML = `
+                <div class="tx-left">
+                    <div class="tx-icon ${valClass}"><i class="fa-solid ${iconClass}"></i></div>
+                    <div class="tx-details">
+                        <h5>${log.title}</h5>
+                        <p>${log.date}</p>
+                    </div>
+                </div>
+                <div class="tx-amount ${valClass}">${log.amount} LGC</div>
+            `;
+            container.appendChild(el);
+        });
+    }
+
+    function addTransactionToVisualLog(type, title, amountStr) {
+        const container = document.getElementById('tx-log-container');
+        const el = document.createElement('div');
+        el.className = 'tx-item';
+        
+        const iconClass = type === 'in' ? 'fa-arrow-down' : 'fa-arrow-up';
+        const valClass = type === 'in' ? 'in' : 'out';
+        const formattedAmount = type === 'in' ? `+${amountStr}` : `-${amountStr}`;
+
+        el.innerHTML = `
+            <div class="tx-left">
+                <div class="tx-icon ${valClass}"><i class="fa-solid ${iconClass}"></i></div>
+                <div class="tx-details">
+                    <h5>${title}</h5>
+                    <p>Just now</p>
+                </div>
+            </div>
+            <div class="tx-amount ${valClass}">${formattedAmount} LGC</div>
+        `;
+        // Insert at the top
+        container.insertBefore(el, container.firstChild);
+    }
+
+    /**
+     * ------------------------------------------------------------------------
+     * UTILITIES & MODAL HANDLING
+     * ------------------------------------------------------------------------
+     */
+    function switchView(viewId, navElement) {
+        // Hide all views
+        document.querySelectorAll('.page-section').forEach(el => {
+            el.classList.remove('active');
+        });
+        
+        // Show target view
+        document.getElementById('view-' + viewId).classList.add('active');
+
+        // Update Navigation UI
+        document.querySelectorAll('.nav-item').forEach(el => {
+            el.classList.remove('active');
+        });
+        navElement.classList.add('active');
+
+        // Render chart only when Market view is opened to save resources
+        if(viewId === 'market') {
+            setTimeout(() => renderMarketChart(), 100);
+        }
+    }
+
+    function initiatePayment(productName, priceEur) {
+        document.getElementById('modal-product').innerText = productName;
+        document.getElementById('modal-cost').innerText = priceEur + ' EUR';
+        
+        // Show modal with animation
+        const modal = document.getElementById('checkout-modal');
+        modal.classList.add('active');
+    }
+
+    function closeModal() {
+        document.getElementById('checkout-modal').classList.remove('active');
+    }
+
+    function copyOfficialWallet() {
+        const addr = document.getElementById('official-wallet-address').innerText;
+        navigator.clipboard.writeText(addr).then(() => {
+            showToast("Copied to Clipboard", "Address copied. Please paste it carefully in your wallet app.", "success");
+        });
+    }
+
+    function copyMyInviteCode() {
+        const code = document.getElementById('prof-code').innerText;
+        navigator.clipboard.writeText(code).then(() => {
+            showToast("Link Copied", "Share this code with your network to earn bonus Hashrate!", "success");
+        });
+    }
+
+</script>
+
+</body>
+</html>
